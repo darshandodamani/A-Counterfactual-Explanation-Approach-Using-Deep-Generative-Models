@@ -1,0 +1,30 @@
+# Ignore virtual environments
+venv_carla/   
+venv_vae/   
+
+# Byte-compilation and other optimizations
+__pycache__/
+
+# Ignore the run
+runs/
+
+# Ignore the tox environment
+.tox/
+
+# Ignore .ini files
+*.ini
+
+# cache files
+.cache/
+
+#temp ignore town10_dataset folder
+dataset/Town07_dataset/
+
+# Ignore the .vscode folder
+.vscode/
+
+# Ignore the settings file
+settings.json
+
+# Igonew latent_space folder
+latent_vectors/
