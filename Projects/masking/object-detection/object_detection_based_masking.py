@@ -1,4 +1,4 @@
-#location: Projects/masking/object-detection/object_detection_based_masking.py
+# location: Projects/masking/object-detection/object_detection_based_masking.py
 import os
 import sys
 import time
@@ -16,6 +16,9 @@ from torchvision import transforms
 from torchvision.transforms.functional import to_pil_image
 from skimage.metrics import structural_similarity as ssim, mean_squared_error as mse, peak_signal_noise_ratio as psnr
 from sewar.full_ref import vifp, uqi
+
+# Set the TORCH_HOME environment variable to the desired directory
+os.environ['TORCH_HOME'] = os.path.join(os.path.dirname(__file__), 'model')
 
 # ------------------------------------------------------------------------------
 # Suppress specific FutureWarning from torch.utils.checkpoint
