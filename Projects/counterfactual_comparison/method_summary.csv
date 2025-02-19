@@ -1,0 +1,10 @@
+Method,Criterion,Rating
+Grid-Based Masking,Counterfactual_1_Interpretability,4.0476190476190474
+Grid-Based Masking,Counterfactual_1_Plausibility,4.285714285714286
+Grid-Based Masking,Counterfactual_1_VisualCoherence,4.428571428571429
+LIME on Images,Counterfactual_2_Interpretability,1.0
+LIME on Images,Counterfactual_2_Plausibility,1.0
+LIME on Images,Counterfactual_2_VisualCoherence,1.0
+LIME on Latent Features,Counterfactual_3_Interpretability,3.857142857142857
+LIME on Latent Features,Counterfactual_3_Plausibility,4.095238095238095
+LIME on Latent Features,Counterfactual_3_VisualCoherence,4.238095238095238

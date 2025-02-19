@@ -1,0 +1,22 @@
+Image,Counterfactual_1_Interpretability,Counterfactual_1_Plausibility,Counterfactual_1_VisualCoherence,Counterfactual_1_Comments,Counterfactual_2_Interpretability,Counterfactual_2_Plausibility,Counterfactual_2_VisualCoherence,Counterfactual_2_Comments,Counterfactual_3_Interpretability,Counterfactual_3_Plausibility,Counterfactual_3_VisualCoherence,Counterfactual_3_Comments
+town7_007815.png,5,5,5,,1,1,1,,3,5,5,
+town7_001973.png,4,4,5,the traffic sign board made AI to change its decision,1,1,1,image is completely damaged,4,4,4,traffic signal is disappeared to change its decision from STOP to GO
+town7_004114.png,4,4,4,slightly blur,1,1,1,completely bad image,4,5,5,Almost same image but visual coherence its hiding all parts of image
+town7_003258.png,4,4,5,the traffic light pole is changed ,1,1,1,,3,4,4,
+town7_002253.png,4,4,4,,1,1,1,,4,4,4,
+town7_008256.png,4,4,4,almost same a s original image,1,1,1,its completely dark image,4,3,3,
+town7_004898.png,3,4,3,,1,1,1,,3,3,3,
+town7_004662.png,5,5,5,traffic light is made to change the decision,1,1,1,,4,4,5,
+town7_008225.png,4,5,5,,1,1,1,,4,4,4,
+town7_007971.png,4,4,5,,1,1,1,,3,5,5,
+town7_011457.png,5,5,5,good image reconstructed,1,1,1,,4,4,4,
+town7_004918.png,4,5,5,,1,1,1,,4,4,4,
+town7_007010.png,4,4,4,,1,1,1,,5,5,5,it retained more information
+town7_004860.png,5,5,5,,1,1,1,,4,4,4,
+town7_004336.png,4,4,4,,1,1,1,,4,4,5,
+town7_008172.png,3,4,4,,1,1,1,,4,4,4,
+town7_007998.png,4,4,4,,1,1,1,,5,5,5,
+town7_010840.png,3,4,4,,1,1,1,,3,3,4,
+town7_007924.png,4,4,5,,1,1,1,,4,4,4,
+town7_001834.png,4,4,4,,1,1,1,,5,5,5,
+town7_011450.png,4,4,4,,1,1,1,,3,3,3,

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Counterfactual Evaluation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+    <h2 class="text-3xl font-bold text-center mb-6">Counterfactual Explanation Evaluation</h2>
+
+    <!-- Display Original Image -->
+    <div class="mb-8 text-center">
+      <h3 class="text-xl font-semibold mb-2">Original Image</h3>
+      <img src="{{ request.url_for('static', path=image_data['original']) }}?t={{ timestamp }}" class="mx-auto w-64 h-auto rounded-md shadow">
+      <p class="mt-2 text-gray-700">
+        Label: 
+        <strong>{{ image_data['labels']['original'] }}</strong>
+      </p>
+    </div>
+
+    <!-- Evaluation Table (anonymous) -->
+    <form method="post" action="">
+      <!-- Hidden field for original image -->
+      <input type="hidden" name="image" value="{{ image_data['original'] }}">
+      
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr class="bg-gray-50">
+            <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Image</th>
+            <th class="px-4 py-2 text-center text-sm font-medium text-gray-600">Interpretability</th>
+            <th class="px-4 py-2 text-center text-sm font-medium text-gray-600">Plausibility</th>
+            <th class="px-4 py-2 text-center text-sm font-medium text-gray-600">Visual Coherence</th>
+            <th class="px-4 py-2 text-center text-sm font-medium text-gray-600">Comments</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for method in ['method1', 'method2', 'method3'] %}
+          <tr>
+            <!-- Counterfactual image cell -->
+            <td class="px-4 py-4 whitespace-nowrap text-center">
+              <img src="{{ request.url_for('static', path=image_data[method]) }}?t={{ timestamp }}" class="mx-auto w-64 h-auto rounded-md shadow">
+              <p class="text-gray-600 text-sm mt-1">
+                Label: 
+                <strong>{{ image_data['labels'][method] }}</strong>
+              </p>
+            </td>
+            <!-- Interpretability rating -->
+            <td class="px-4 py-4 whitespace-nowrap">
+              <div class="flex justify-center space-x-1">
+                {% for i in range(1, 6) %}
+                <label class="flex items-center">
+                  <input type="radio" name="interpretability_{{ method }}" value="{{ i }}" required class="mr-1">
+                  <span class="text-sm">{{ i }}</span>
+                </label>
+                {% endfor %}
+              </div>
+            </td>
+            <!-- Plausibility rating -->
+            <td class="px-4 py-4 whitespace-nowrap">
+              <div class="flex justify-center space-x-1">
+                {% for i in range(1, 6) %}
+                <label class="flex items-center">
+                  <input type="radio" name="plausibility_{{ method }}" value="{{ i }}" required class="mr-1">
+                  <span class="text-sm">{{ i }}</span>
+                </label>
+                {% endfor %}
+              </div>
+            </td>
+            <!-- Visual Coherence rating -->
+            <td class="px-4 py-4 whitespace-nowrap">
+              <div class="flex justify-center space-x-1">
+                {% for i in range(1, 6) %}
+                <label class="flex items-center">
+                  <input type="radio" name="visual_coherence_{{ method }}" value="{{ i }}" required class="mr-1">
+                  <span class="text-sm">{{ i }}</span>
+                </label>
+                {% endfor %}
+              </div>
+            </td>
+            <!-- Comments cell -->
+            <td class="px-4 py-4 whitespace-nowrap">
+              <textarea name="comments_{{ method }}" rows="2" class="border rounded-md p-1 w-full" placeholder="Optional"></textarea>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="mt-8 text-center">
+        <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105">
+          Submit
+        </button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
