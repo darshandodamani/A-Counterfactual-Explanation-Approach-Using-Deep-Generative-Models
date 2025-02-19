@@ -1,0 +1,11 @@
+Metrics,Total Count,Count,Percentage
+Total GO,1499,,
+GO (Counterfactual Found),,2,0.13%
+GO (Counterfactual Not Found),,1497,99.87%
+Total STOP,923,,
+STOP (Counterfactual Found),,923,100.00%
+STOP (Counterfactual Not Found),,0,0.00%
+Total,2422,,
+Total (Counterfactual Found),,925,38.19%
+Total (Counterfactual Not Found),,1497,61.81%
+Total Time Taken,,1704.44,
