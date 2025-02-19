@@ -1,0 +1,6 @@
+# requirements_carla.txt
+#For CARLA-related tasks (Python 3.7)
+carla==0.9.15
+pygame==2.1.0
+numpy==1.21.0
+

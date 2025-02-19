@@ -39,7 +39,7 @@ We have used **CARLA (version 0.9.15)** as our urban driving simulator to collec
 3. **Install Dependencies**: Install the required dependencies using:
 
    ```bash
-   pip install -r requirements.txt
+   pip install -r requirements_carla.txt
    ```
 4. **Download CARLA Server**: Download **CARLA server (0.9.15)** and **additional maps** from the [official CARLA repository](https://github.com/carla-simulator/carla/releases).
 5. **Start CARLA Server**: Make sure to start the CARLA server before running the client.
