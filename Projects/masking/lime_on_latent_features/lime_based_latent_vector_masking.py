@@ -1,17 +1,4 @@
 #location: Projects/masking/lime_on_latent_features/lime_based_latent_vector_masking.py
-"""
-lime_based_latent_vector_masking.py
-
-This script performs LIME-based masking in the latent feature space.
-It loads an image, encodes it to obtain latent features, uses a tabular LIME explainer
-to determine important latent features, and then replaces those features with median values.
-When a counterfactual (changed prediction) is found, it computes image similarity metrics,
-saves a comparison plot, saves the original image and the reconstructed masked image separately,
-updates a results CSV file immediately, and (for True cases) appends replacement info 
-(image filename, indices of replaced latent features, original values, and median values)
-to a separate CSV file for later evaluation.
-"""
-
 import os
 import sys
 import time
@@ -122,10 +109,6 @@ transform = transforms.Compose([
 # Helper Functions
 # ------------------------------------------------------------------------------
 def calculate_image_metrics(original: np.ndarray, modified: np.ndarray) -> Dict[str, float]:
-    """
-    Calculates image similarity metrics (SSIM, MSE, PSNR, UQI, and VIFP) between two images.
-    If dimensions differ, the modified image is resized to match the original.
-    """
     if original.shape != modified.shape:
         modified = cv2.resize(modified, (original.shape[1], original.shape[0]))
     metrics = {
@@ -168,10 +151,6 @@ def plot_and_save_images(original_image: np.ndarray, reconstructed_image: np.nda
     logging.info(f"Plot saved to {filename}")
 
 def predict_with_latent(latent: np.ndarray) -> np.ndarray:
-    """
-    Helper function for LIME: converts a latent vector (numpy array) to a tensor,
-    passes it through the classifier, and returns the softmax probabilities.
-    """
     latent_tensor = torch.tensor(latent, dtype=torch.float32).to(device)
     output = classifier(latent_tensor)
     return F.softmax(output, dim=1).cpu().detach().numpy()
@@ -229,20 +208,6 @@ def append_replacement_info(info: Dict[str, str]) -> None:
 # Main Processing Function
 # ------------------------------------------------------------------------------
 def process_lime_on_latent_masking() -> None:
-    """
-    Runs LIME-based masking on each image from the initial predictions.
-    For each image:
-      - Loads and transforms the image.
-      - Encodes it to obtain latent features.
-      - Uses LIME on the latent vector to assess feature importance.
-      - Gradually replaces important features with median values until a counterfactual is found.
-      - Computes image metrics using the decoder's reconstruction from the masked latent vector.
-      - Saves a combined comparison plot.
-      - Saves the original image and the reconstructed masked image separately.
-      - Updates the results CSV file immediately.
-      - For True cases, immediately appends replacement info (image filename, indices, original values, replaced values)
-        to a separate CSV file.
-    """
     for _, row in df_initial.iterrows():
         start_time = time.time()
         image_filename = row["Image File"]
