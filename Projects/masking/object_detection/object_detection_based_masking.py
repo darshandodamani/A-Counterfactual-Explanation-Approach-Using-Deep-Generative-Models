@@ -1,24 +1,25 @@
-# location: Projects/masking/object-detection/object_detection_based_masking.py
+# location : Projects/masking/object_detection/object_detection_based_masking_4_classes.py
 import os
 import sys
 import time
 import logging
-import warnings
-from typing import Tuple, Dict, List
-
 import torch
+import warnings
 import torch.nn.functional as F
 import numpy as np
 import pandas as pd
 from PIL import Image
-import matplotlib.pyplot as plt
 from torchvision import transforms
-from torchvision.transforms.functional import to_pil_image
-from skimage.metrics import structural_similarity as ssim, mean_squared_error as mse, peak_signal_noise_ratio as psnr
-from sewar.full_ref import vifp, uqi
 
-# Set the TORCH_HOME environment variable to the desired directory
-os.environ['TORCH_HOME'] = os.path.join(os.path.dirname(__file__), 'model')
+# Add the parent directory (where masking_utils.py is located) to sys.path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.abspath(os.path.join(script_dir, "..")))
+
+# Import utilities from masking_utils
+from masking_utils import (
+    load_models, METHODS_RESULTS, METHODS_HEADERS,
+    calculate_image_metrics, save_images, update_results_csv
+)
 
 # ------------------------------------------------------------------------------
 # Suppress specific FutureWarning from torch.utils.checkpoint
@@ -26,195 +27,76 @@ os.environ['TORCH_HOME'] = os.path.join(os.path.dirname(__file__), 'model')
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch.utils.checkpoint")
 
 # Suppress specific FutureWarning from torch.cuda.amp.autocast
-warnings.filterwarnings("ignore", category=FutureWarning, message="`torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.")
+warnings.filterwarnings("ignore", category=FutureWarning, message="torch.cuda.amp.autocast(args...) is deprecated. Please use torch.amp.autocast('cuda', args...) instead.")
 # Use a regex pattern to catch any message mentioning torch.cuda.amp.autocast
 warnings.filterwarnings("ignore", message=".*torch\\.cuda\\.amp\\.autocast.*", category=FutureWarning)
 
-# ------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
 # Setup Logging
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# ------------------------------------------------------------------------------
-# Add Python Paths for local modules
-# ------------------------------------------------------------------------------
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.abspath(os.path.join(script_dir, "..", "..", "autoencoder")))
-from encoder import VariationalEncoder
-from decoder import Decoder
-from classifier import ClassifierModel as Classifier
-
-sys.path.append(os.path.abspath(os.path.join(script_dir, "..")))
-from initialize_masking_pipeline import INITIAL_PREDICTIONS_CSV as initial_predictions_csv
-
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Paths and Constants
-# ------------------------------------------------------------------------------
-ENCODER_PATH = "model/epochs_500_latent_128_town_7/var_encoder_model.pth"
-DECODER_PATH = "model/epochs_500_latent_128_town_7/decoder_model.pth"
-CLASSIFIER_PATH = "model/epochs_500_latent_128_town_7/classifier_final.pth"
-OUTPUT_CSV = "results/masking/object_detection_masking_results.csv"
-TEST_DIR = "dataset/town7_dataset/test/"
-
-# Directories for saving plots and individual images
-PLOT_DIR = "plots/object_detection_masking_images"
-OBJECT_DET_ORIG_DIR = "plots/object_detection_original"
-OBJECT_DET_MASKED_REC_DIR = "plots/object_detection_masked_reconstructed"
-
-for d in [PLOT_DIR, OBJECT_DET_ORIG_DIR, OBJECT_DET_MASKED_REC_DIR]:
-    os.makedirs(d, exist_ok=True)
-
-# Image dimensions (height, width)
+# ----------------------------------------------------------------------------
 IMAGE_HEIGHT, IMAGE_WIDTH = 80, 160
-
-# Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-# ------------------------------------------------------------------------------
-# Model Loading
-# ------------------------------------------------------------------------------
-def load_models() -> Tuple[VariationalEncoder, Decoder, Classifier]:
-    """
-    Load encoder, decoder, and classifier models and set them to evaluation mode.
-    """
-    encoder = VariationalEncoder(latent_dims=128, num_epochs=100).to(device)
-    decoder = Decoder(latent_dims=128, num_epochs=100).to(device)
-    classifier = Classifier().to(device)
-
-    encoder.load_state_dict(torch.load(ENCODER_PATH, map_location=device, weights_only=True))
-    decoder.load_state_dict(torch.load(DECODER_PATH, map_location=device, weights_only=True))
-    classifier.load_state_dict(torch.load(CLASSIFIER_PATH, map_location=device, weights_only=True))
-
-    encoder.eval()
-    decoder.eval()
-    classifier.eval()
-
-    return encoder, decoder, classifier
-
-
-# ------------------------------------------------------------------------------
-# Transformation Pipeline
-# ------------------------------------------------------------------------------
-transform = transforms.Compose([
-    transforms.Resize((IMAGE_HEIGHT, IMAGE_WIDTH)),
-    transforms.ToTensor(),
-])
-
-
-# ------------------------------------------------------------------------------
-# Metrics Calculation
-# ------------------------------------------------------------------------------
-def calculate_image_metrics(original_image: torch.Tensor, modified_image: torch.Tensor) -> Dict[str, float]:
-    """
-    Calculate similarity metrics between the original and modified images.
-    """
-    # Convert tensors to numpy arrays; expected values in [0, 1]
-    original_np = original_image.cpu().squeeze().permute(1, 2, 0).numpy()
-    modified_np = modified_image.cpu().squeeze().permute(1, 2, 0).detach().numpy()
-
-    # When using full=True, the function returns (score, full_ssim_image).
-    ssim_value = ssim(original_np, modified_np, channel_axis=-1, full=True, data_range=1.0)[0]
-    metrics = {
-        "SSIM": round(float(ssim_value), 5),
-        "MSE": round(mse(original_np, modified_np), 5),
-        "PSNR": round(psnr(original_np, modified_np, data_range=1.0), 5),
-        "UQI": round(uqi(original_np, modified_np), 5),
-        "VIFP": round(vifp(original_np, modified_np), 5),
-    }
-    return metrics
-
-
-# ------------------------------------------------------------------------------
-# Plotting & Saving Combined Images
-# ------------------------------------------------------------------------------
-def plot_and_save_images(input_image: torch.Tensor,
-                         reconstructed_image: torch.Tensor,
-                         masked_image: torch.Tensor,
-                         reconstructed_masked_image: torch.Tensor,
-                         filename: str) -> None:
-    """
-    Save a combined plot of:
-      - The original image,
-      - Its reconstruction,
-      - The masked image,
-      - And the reconstruction of the masked image.
-    """
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-
-    input_h, input_w = input_image.shape[2], input_image.shape[3]
-    reconstructed_resized = F.interpolate(reconstructed_image, size=(input_h, input_w), mode='bilinear', align_corners=False)
-    reconstructed_masked_resized = F.interpolate(reconstructed_masked_image, size=(input_h, input_w), mode='bilinear', align_corners=False)
-
-    fig, axs = plt.subplots(1, 4, figsize=(20, 5))
-    axs[0].imshow(input_image.cpu().squeeze().permute(1, 2, 0).numpy())
-    axs[0].set_title("Original Image")
-    axs[0].axis("off")
-
-    axs[1].imshow(reconstructed_resized.cpu().squeeze().permute(1, 2, 0).detach().numpy())
-    axs[1].set_title("Reconstructed Image")
-    axs[1].axis("off")
-
-    axs[2].imshow(masked_image.cpu().squeeze().permute(1, 2, 0).detach().numpy())
-    axs[2].set_title("Masked Image")
-    axs[2].axis("off")
-
-    axs[3].imshow(reconstructed_masked_resized.cpu().squeeze().permute(1, 2, 0).detach().numpy())
-    axs[3].set_title("Reconstructed Masked Image")
-    axs[3].axis("off")
-
-    plt.tight_layout()
-    plt.savefig(filename)
-    plt.close()
-    logging.info(f"Saved combined plot to: {filename}")
-
-
-# ------------------------------------------------------------------------------
-# Save Individual Images
-# ------------------------------------------------------------------------------
-def save_individual_images(original_pil: Image.Image, reconstructed_masked_tensor: torch.Tensor, base_filename: str) -> None:
-    """
-    Save the original image and the reconstructed masked image individually
-    to designated folders.
-    """
-    # Save the original image.
-    original_save_path = os.path.join(OBJECT_DET_ORIG_DIR, f"{base_filename}_original.png")
-    original_pil.save(original_save_path)
-    logging.info(f"Saved original image to: {original_save_path}")
-
-    # Resize the reconstructed masked image to (IMAGE_HEIGHT, IMAGE_WIDTH) and convert to PIL.
-    reconstructed_masked_resized = F.interpolate(reconstructed_masked_tensor, size=(IMAGE_HEIGHT, IMAGE_WIDTH),
-                                                  mode="bilinear", align_corners=False)
-    reconstructed_masked_pil = to_pil_image(reconstructed_masked_resized.cpu().squeeze(0))
-    masked_rec_save_path = os.path.join(OBJECT_DET_MASKED_REC_DIR, f"{base_filename}_masked_reconstructed.png")
-    reconstructed_masked_pil.save(masked_rec_save_path)
-    logging.info(f"Saved reconstructed masked image to: {masked_rec_save_path}")
-
+CLASS_LABELS_4_CLASS = {0: "STOP", 1: "GO", 2: "RIGHT", 3: "LEFT"}
+CLASS_LABELS_2_CLASS = {0: "STOP", 1: "GO"}
 
 # ------------------------------------------------------------------------------
 # Main Processing Function
 # ------------------------------------------------------------------------------
-def process_object_detection_masking() -> None:
+def process_object_detection_masking(classifier_type:str = "4_class"):
     """
-    Run object detection-based masking on each test image, update the results CSV after each image,
-    and save individual original and reconstructed masked images.
+    Runs object detection-based masking for either 2_class or 4_class classification.
+    
+    Args:
+        classifier_type (str): "2_class" or "4_class" to specify which classifier to use.
     """
-    # Load CSV files with initial predictions and previous results.
-    df_initial = pd.read_csv(initial_predictions_csv)
-    df_results = pd.read_csv(OUTPUT_CSV)
+    logging.info(f" Starting object detection-based masking with {classifier_type} classification.")
 
-    # Load our models: encoder, decoder, and classifier.
-    encoder, decoder, classifier = load_models()
-
-    # Load the YOLO model for object detection (loaded once).
+    # Load correct models based on classifier type
+    encoder, decoder, classifier = load_models(classifier_type)
+    logging.info(f" Models loaded for {classifier_type}.")
+    
+    # select the csv file based on the classifier type
+    output_csv = METHODS_RESULTS[f"object_detection_{classifier_type}"]
+    logging.info(f" Output CSV: {output_csv}")
+    
+    # Select the correct label mapping based on classifier type
+    label_mapping = CLASS_LABELS_2_CLASS if classifier_type == "2_class" else CLASS_LABELS_4_CLASS
+    
+    IMAGE_DIRS = {
+        "original": f"plots/object_detection_{classifier_type}_original",
+        "masked": f"plots/object_detection_{classifier_type}_masked",
+        "reconstructed": f"plots/object_detection_{classifier_type}_reconstructed"
+    }
+    
+    for dir_path in IMAGE_DIRS.values():
+        os.makedirs(dir_path, exist_ok=True)
+    
+    # Load YOLO model for object detection
     yolo_model = torch.hub.load('ultralytics/yolov5', 'yolov5s', force_reload=False, autoshape=True)
-
-    # Process each image.
-    for _, row in df_initial.iterrows():
+    
+    if not os.path.exists(output_csv):
+        logging.info(f"{output_csv} not found. Creating a new CSV file.")
+        df_results = pd.DataFrame(columns=METHODS_HEADERS[f"object_detection_{classifier_type}"])
+        df_results.to_csv(output_csv, index=False)
+    else:
+        try:
+            df_results = pd.read_csv(output_csv)
+        except pd.errors.EmptyDataError:
+            logging.warning(f"{output_csv} is empty. Initializing with headers.")
+            df_results = pd.DataFrame(columns=METHODS_HEADERS[f"object_detection_{classifier_type}"])
+            df_results.to_csv(output_csv, index=False)
+            
+    TEST_DIR = "dataset/town7_dataset/test/"
+    for image_filename in sorted(f for f in os.listdir(TEST_DIR) if f.endswith(".png")):
         start_time = time.time()
-        image_filename = row["Image File"]
         image_path = os.path.join(TEST_DIR, image_filename)
-        base_filename, _ = os.path.splitext(image_filename)
 
         try:
             pil_image = Image.open(image_path).convert("RGB")
@@ -222,101 +104,93 @@ def process_object_detection_masking() -> None:
             logging.error(f"Error loading image {image_path}: {e}")
             continue
 
-        input_image = transform(pil_image).unsqueeze(0).to(device)
+        logging.info(f" Processing image: {image_filename}")
+        input_image = transforms.ToTensor()(pil_image).unsqueeze(0).to(device)
 
-        # Default results
+        # Step 1: Get Initial Prediction
+        latent_vector = encoder(input_image)[2]
+        original_prediction = classifier(latent_vector)
+        predicted_label_before_masking_idx = torch.argmax(original_prediction, dim=1).item()
+        predicted_label_before_masking = label_mapping[predicted_label_before_masking_idx]
+        confidence_before_masking = [round(float(x), 5) for x in F.softmax(original_prediction, dim=1).cpu().detach().numpy().flatten()]
+
+        # Step 2:Run Object Detection (YOLO)
+        results = yolo_model(pil_image)
+        detections = results.xyxy[0]
         counterfactual_found = False
-        final_prediction = row["Prediction (Before Masking)"]
-        bbox_dimensions = "N/A"
-        bbox_position = "N/A"
-        confidence_final_str = "N/A"
-        metrics = {"SSIM": "", "MSE": "", "PSNR": "", "UQI": "", "VIFP": ""}
-        objects_detected: List[str] = []
+        objects_detected = "None"
+        bbox_info = ""
+        metrics = {}
 
-        with torch.no_grad():
-            # Run YOLO object detection on the PIL image.
-            results = yolo_model(pil_image)
-            detections = results.xyxy[0]  # bounding boxes: [x_min, y_min, x_max, y_max, confidence, class]
-            if detections.numel() > 0:
-                # Get names for detected objects.
-                objects_detected = [results.names[int(det[5])] for det in detections]
-                # Process each detection.
-                for det in detections:
-                    x_min, y_min, x_max, y_max = map(int, det[:4])
-                    bbox_dimensions = f"({x_max - x_min}, {y_max - y_min})"
-                    bbox_position = f"({x_min}, {y_min})"
+        predicted_label_after_masking = predicted_label_before_masking  # Default to original prediction
+        confidence_after_masking = confidence_before_masking  # Default confidence values
 
-                    # Create masked image by zeroing out the detected bounding box region.
-                    masked_image = input_image.clone()
-                    masked_image[:, :, y_min:y_max, x_min:x_max] = 0
+        if detections.numel() == 0:
+            logging.warning(f" No objects detected in {image_filename}. Skipping masking.")
+        else:
+            for det in detections:
+                x_min, y_min, x_max, y_max = map(int, det[:4])
+                objects_detected = results.names[int(det[5])]
+                bbox_info = f"({x_min}, {y_min}, {x_max}, {y_max})"
 
-                    # Get prediction on the masked image.
-                    latent_vector_masked = encoder(masked_image)[2]
-                    masked_prediction = classifier(latent_vector_masked)
-                    confidence_final = F.softmax(masked_prediction, dim=1).cpu().detach().numpy().flatten()
-                    confidence_final_str = ", ".join(map(str, confidence_final))
-                    predicted_label_after_masking = torch.argmax(masked_prediction, dim=1).item()
-                    final_prediction = "STOP" if predicted_label_after_masking == 0 else "GO"
+                # Step 3: Apply Object Detection-Based Masking
+                masked_image = input_image.clone()
+                masked_image[:, :, y_min:y_max, x_min:x_max] = 0
 
-                    # If a counterfactual is found, compute metrics and save images.
-                    if final_prediction != row["Prediction (Before Masking)"]:
-                        counterfactual_found = True
-                        metrics = calculate_image_metrics(input_image, masked_image)
+                # Step 4: Encode Masked Image
+                latent_vector_masked = encoder(masked_image)[2]
 
-                        # Reconstruct the masked image using the decoder.
-                        reconstructed_masked_image = decoder(latent_vector_masked)
-                        # Also get the reconstruction for the original input (for combined plotting).
-                        latent_vector_original = encoder(input_image)[2]
-                        reconstructed_image = decoder(latent_vector_original)
+                # Step 5: Decode Masked Latent Space
+                reconstructed_masked_image = decoder(latent_vector_masked)
+                reconstructed_masked_image = F.interpolate(reconstructed_masked_image, size=(input_image.shape[2], input_image.shape[3]), mode="bilinear", align_corners=False)
 
-                        # Save the combined plot image.
-                        plot_filename = os.path.join(PLOT_DIR, f"{base_filename}_det_{x_min}_{y_min}_{x_max}_{y_max}.png")
-                        plot_and_save_images(input_image, reconstructed_image, masked_image, reconstructed_masked_image, plot_filename)
+                # Step 6: Re-encode the Reconstructed Masked Image
+                latent_vector_re_encoded = encoder(reconstructed_masked_image)[2]
 
-                        # Save individual images.
-                        save_individual_images(pil_image, reconstructed_masked_image, base_filename)
-                        break  # Stop after the first counterfactual for this image.
+                # Step 7: Classify the Re-Encoded Latent Space
+                masked_prediction = classifier(latent_vector_re_encoded)
+                predicted_label_after_masking_idx = torch.argmax(masked_prediction, dim=1).item()
+                predicted_label_after_masking = label_mapping[predicted_label_after_masking_idx]
+                confidence_after_masking = [round(float(x), 5) for x in F.softmax(masked_prediction, dim=1).cpu().detach().numpy().flatten()]
 
-        total_time_taken = round(time.time() - start_time + float(row["Time Taken (s)"]), 5)
+                # Step 8: Compare Predictions
+                if predicted_label_after_masking != predicted_label_before_masking:
+                    counterfactual_found = True
+                    metrics = calculate_image_metrics(input_image, reconstructed_masked_image)
+                    
+                    # Save Images Only if Counterfactual is Found
+                    save_images(
+                        image_filename, input_image, masked_image, reconstructed_masked_image, IMAGE_DIRS
+                    )
+                break  # Stop after the first object detection mask
 
-        # Update the results DataFrame for the current image.
-        df_results.loc[df_results['Image File'] == image_filename, [
-            "Prediction (After Masking)",
-            "Confidence (After Masking)",
-            "Counterfactual Found",
-            "Grid Size",            # Here storing bounding box dimensions.
-            "Grid Position",        # Here storing bounding box position.
-            "SSIM",
-            "MSE",
-            "PSNR",
-            "UQI",
-            "VIFP",
-            "Objects Detected",
-            "Time Taken (s)"
-        ]] = [
-            final_prediction,
-            confidence_final_str,
-            counterfactual_found,
-            bbox_dimensions,
-            bbox_position,
-            metrics["SSIM"],
-            metrics["MSE"],
-            metrics["PSNR"],
-            metrics["UQI"],
-            metrics["VIFP"],
-            ", ".join(objects_detected) if objects_detected else "None",
-            total_time_taken
-        ]
+        # Step 9: Calculate Time Taken
+        end_time = time.time()
+        total_time_taken = round(end_time - start_time, 5)
 
-        # Write out the CSV file immediately after processing each image.
-        df_results.to_csv(OUTPUT_CSV, index=False)
-        logging.info(f"Updated CSV for image {image_filename}")
+        # Step 10: Update CSV
+        update_results_csv(
+            # "object_detection_2_class" if classifier_type == "2_class" else "object_detection_4_class",
+            f"object_detection_{classifier_type}",
+            image_filename, {
+                "Prediction (Before Masking)": predicted_label_before_masking,
+                "Confidence (Before Masking)": confidence_before_masking,
+                "Prediction (After Masking)": predicted_label_after_masking,
+                "Confidence (After Masking)": confidence_after_masking,
+                "Counterfactual Found": counterfactual_found,
+                "Grid Size": bbox_info,
+                "Grid Position": bbox_info,
+                "SSIM": metrics.get("SSIM", ""),
+                "MSE": metrics.get("MSE", ""),
+                "PSNR": metrics.get("PSNR", ""),
+                "UQI": metrics.get("UQI", ""),
+                "VIFP": metrics.get("VIFP", ""),
+                "Objects Detected": objects_detected,
+                "Time Taken (s)": total_time_taken
+            }, output_csv
+        )
+        
+        logging.info(f" Updated CSV for image {image_filename}")
 
-    logging.info(f"Object detection-based masking results saved to {OUTPUT_CSV}")
-
-
-# ------------------------------------------------------------------------------
-# Main Entry Point
-# ------------------------------------------------------------------------------
 if __name__ == "__main__":
     process_object_detection_masking()
