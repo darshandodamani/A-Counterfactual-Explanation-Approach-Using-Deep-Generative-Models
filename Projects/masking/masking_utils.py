@@ -31,8 +31,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 METHODS_RESULTS: Dict[str, str] = {
     "grid_based_2_class": "results/masking/grid_based/grid_based_masking_2_classes_results.csv",
     "grid_based_4_class": "results/masking/grid_based/grid_based_masking_4_classes_results.csv",
-    "lime_on_image_2_class": "results/masking/lime_on_image_masking_2_classes_results.csv",
-    "lime_on_image_4_class": "results/masking/lime_on_image_masking_4_classes_results.csv",
+    "lime_on_image_2_class": "results/masking/lime_on_images/lime_on_image_masking_2_classes_results.csv",
+    "lime_on_image_4_class": "results/masking/lime_on_images/lime_on_image_masking_4_classes_results.csv",
     "object_detection_2_class": "results/masking/object_detection/object_detection_masking_2_classes_results.csv",
     "object_detection_4_class": "results/masking/object_detection/object_detection_masking_4_classes_results.csv", 
     "lime_on_latent_feature_2_class": "results/masking/lime_on_latent/lime_on_latent_masking_2_classes_results.csv",
