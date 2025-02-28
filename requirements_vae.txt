@@ -12,7 +12,13 @@ seaborn==0.13.2
 scikit-image==0.24.0
 plantuml==0.3.0
 tensorboard==2.17.1
+sewar==0.4.6
+torchviz==0.0.3
+scipy==1.15.2
 
 # For fastapi
 fastapi == 0.115.8
 uvicorn == 0.34.0
+
+# For venn diagram
+venny4py==1.0.3
