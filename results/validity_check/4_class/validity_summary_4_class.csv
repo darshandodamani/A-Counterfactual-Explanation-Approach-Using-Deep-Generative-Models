@@ -1,0 +1,5 @@
+Method,Total Counterfactuals,Successful Counterfactuals,Validity (%)
+Grid-Based Masking,2326,2316,99.57
+Object Detection,2326,84,3.61
+LIME on Images,2326,2044,87.88
+LIME on Latent Features,2326,211,9.07
