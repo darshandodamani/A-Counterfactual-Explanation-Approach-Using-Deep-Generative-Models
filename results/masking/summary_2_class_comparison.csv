@@ -1,0 +1,5 @@
+Method,Total,Total STOP,STOP CE Found,STOP CE Found (%),STOP CE Not Found,STOP CE Not Found (%),Total GO,GO CE Found,GO CE Found (%),GO CE Not Found,GO CE Not Found (%),Total CE Found,Total CE Found (%),Total CE Not Found,Total CE Not Found (%),Total Time Taken (s),Total Time Taken (min)
+grid_based,2370,897,897,100.00%,0,0.00%,1473,759,51.53%,714,48.47%,1656,69.87%,714,30.13%,1196.71,19.95
+object_detection,2370,897,41,4.57%,856,95.43%,1473,2,0.14%,1471,99.86%,43,1.81%,2327,98.19%,203.31,3.39
+lime_on_image,2370,897,897,100.00%,0,0.00%,1473,0,0.00%,1473,100.00%,897,37.85%,1473,62.15%,4502.62,75.04
+lime_on_latent,2370,897,86,9.59%,811,90.41%,1473,42,2.85%,1431,97.15%,128,5.40%,2242,94.60%,3812.55,63.54

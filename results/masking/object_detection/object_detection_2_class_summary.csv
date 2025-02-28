@@ -1,0 +1,2 @@
+Method,Total,Total STOP,STOP CE Found,STOP CE Found (%),STOP CE Not Found,STOP CE Not Found (%),Total GO,GO CE Found,GO CE Found (%),GO CE Not Found,GO CE Not Found (%),Total CE Found,Total CE Found (%),Total CE Not Found,Total CE Not Found (%),Total Time Taken (s),Total Time Taken (min)
+object_detection,2370,897,41,4.57%,856,95.43%,1473,2,0.14%,1471,99.86%,43,1.81%,2327,98.19%,203.31,3.39

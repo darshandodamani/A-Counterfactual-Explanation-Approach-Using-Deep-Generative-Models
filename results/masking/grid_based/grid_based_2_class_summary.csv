@@ -1,0 +1,2 @@
+Method,Total,Total STOP,STOP CE Found,STOP CE Found (%),STOP CE Not Found,STOP CE Not Found (%),Total GO,GO CE Found,GO CE Found (%),GO CE Not Found,GO CE Not Found (%),Total CE Found,Total CE Found (%),Total CE Not Found,Total CE Not Found (%),Total Time Taken (s),Total Time Taken (min)
+grid_based,2370,897,897,100.00%,0,0.00%,1473,759,51.53%,714,48.47%,1656,69.87%,714,30.13%,1196.71,19.95
