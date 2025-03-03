@@ -1,4 +1,4 @@
-# requirements_carla.txt
+# requirements_vae.txt
 # For VAE, masking, counterfactual explanations (Python 3.11.11)
 torch==2.5.0
 torchvision==0.20.0
