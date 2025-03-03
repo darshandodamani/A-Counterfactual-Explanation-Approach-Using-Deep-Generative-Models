@@ -102,25 +102,20 @@ python split_dataset.py --data_path <path_to_dataset> --train_ratio 0.8
 - **Parameters**:
   - `--train_ratio`: Ratio of the data to use for training (default: 0.8).
 
-# Directory Structure
+## Running the Web Application
 
-After collecting, labeling, and splitting the dataset, your project directory should look like this:
+Follow these steps to run the web application locally:
 
+```bash
+uvicorn Projects.counterfactual_comparison.app:app --reload
 ```
-dataset/
-  town7_dataset/
-    labeled_data_log.csv
-    train/
-      train_data_log.csv
-      ... (train images)
-    test/
-      test_data_log.csv
-      ... (test images)
-plots/
-  dataset_images/
-    label_distribution.png
-    dataset_split.png
-```
+
+This runs the app in development mode with auto-reload enabled. The app will be accessible at http://127.0.0.1:8000.
+
+## Access the App in Your Browser
+
+- Open your browser and go to http://127.0.0.1:8000/ to view the welcome page.
+- Click the Start Evaluation button to begin the counterfactual explanation evaluation.
 
 # Built With
 
