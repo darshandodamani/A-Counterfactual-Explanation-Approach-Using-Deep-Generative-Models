@@ -51,7 +51,7 @@ for class_type in class_types:
             df = pd.read_csv(filepath)
             validity_results.append(calculate_validity(df, method))
         else:
-            print(f"⚠ Warning: {filepath} not found. Skipping {method}.")
+            print(f" Warning: {filepath} not found. Skipping {method}.")
     
     # Convert results into a DataFrame and save the CSV
     validity_df = pd.DataFrame(validity_results)

@@ -37,6 +37,8 @@ METHODS_RESULTS: Dict[str, str] = {
     "object_detection_4_class": "results/masking/object_detection/object_detection_masking_4_classes_results.csv", 
     "lime_on_latent_feature_2_class": "results/masking/lime_on_latent/lime_on_latent_masking_2_classes_results.csv",
     "lime_on_latent_feature_4_class": "results/masking/lime_on_latent/lime_on_latent_masking_4_classes_results.csv",
+    "shap_on_latent_feature_2_class": "results/masking/lime_on_latent/shap_on_latent_masking_2_classes_results.csv",
+    "shap_on_latent_feature_4_class": "results/masking/lime_on_latent/shap_on_latent_masking_4_classes_results.csv"
 }
 
 # ----------------------------------------------------------------------------
@@ -86,6 +88,14 @@ METHODS_HEADERS: Dict[str, list] = {
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
         "Feature Selection (%)", "Selected Features", "SSIM", "MSE", "PSNR", "UQI", "VIFP",
         "Time Taken (s)"
+    ],
+    "shap_on_latent_feature_2_class": [
+        "Image File", "Prediction (Before Masking)", "Prediction (After Masking)", "Counterfactual Found",
+        "Selected Features", "Time Taken (s)"
+    ],
+    "shap_on_latent_feature_4_class": [
+        "Image File", "Prediction (Before Masking)", "Counterfactual Found",
+        "Selected Features", "Time Taken (s)"
     ]
 }
 
@@ -332,15 +342,34 @@ def process_lime_on_latent_masking():
         p.join()
         logging.info("Completed LIME on Latent masking.")
         
+def process_shap_on_latent_masking():
+    """
+    Calls the LIME on Latent masking script and executes the process.
+    """
+    from lime_on_latent_features.shap_on_latent_feature_masking import process_shap_on_latent_masking
+    classifer_types = ["2_class", "4_class"]
+    
+    processes = []
+    for classifier_type in classifer_types:
+        logging.info(f"Starting LIME on Latent masking for {classifier_type} in parallel.")
+        p = multiprocessing.Process(target=process_shap_on_latent_masking, args=(classifier_type,))
+        processes.append(p)
+        p.start()
+        
+    for p in processes:
+        p.join()
+        logging.info("Completed LIME on Latent masking.")
+        
 def run_parallel_masking():
     """
     Runs all masking methods in parallel using multiprocessing.
     """
     methods = {
-        "grid_based": process_grid_based_masking,
-        "object_detection": process_object_detection_based_masking,
-        "lime_on_image": process_lime_on_image_masking,
-        "lime_on_latent": process_lime_on_latent_masking,
+        # "grid_based": process_grid_based_masking,
+        # "object_detection": process_object_detection_based_masking,
+        # "lime_on_image": process_lime_on_image_masking,
+        # "lime_on_latent": process_lime_on_latent_masking,
+        "shap_on_latent": process_shap_on_latent_masking
     }
     
     processes = []
