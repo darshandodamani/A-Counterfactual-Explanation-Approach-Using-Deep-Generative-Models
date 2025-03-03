@@ -365,11 +365,11 @@ def run_parallel_masking():
     Runs all masking methods in parallel using multiprocessing.
     """
     methods = {
-        # "grid_based": process_grid_based_masking,
-        # "object_detection": process_object_detection_based_masking,
-        # "lime_on_image": process_lime_on_image_masking,
-        # "lime_on_latent": process_lime_on_latent_masking,
-        "shap_on_latent": process_shap_on_latent_masking
+        "grid_based": process_grid_based_masking,
+        "object_detection": process_object_detection_based_masking,
+        "lime_on_image": process_lime_on_image_masking,
+        "lime_on_latent": process_lime_on_latent_masking,
+        # "shap_on_latent": process_shap_on_latent_masking
     }
     
     processes = []

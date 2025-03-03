@@ -228,47 +228,15 @@ def save_reconstructions(model, trainloader, epoch):
             break  # Save reconstructions for the first batch only
 
 
-# def visualize_latent_space(z_values, image_paths):
-#     """Performs PCA on z values and creates a scatter plot with image paths."""
-#     # Perform PCA to reduce to 2D for visualization
-#     pca = PCA(n_components=2)
-#     z_pca = pca.fit_transform(z_values.cpu().detach().numpy())
-
-#     # Create a DataFrame for visualization
-#     df = pd.DataFrame(
-#         {"z1": z_pca[:, 0], "z2": z_pca[:, 1], "image_paths": image_paths}
-#     )
-
-#     # Plot with Plotly
-#     fig = px.scatter(df, x="z1", y="z2", hover_data=["image_paths"])
-#     fig.update_traces(marker=dict(size=8, opacity=0.7), selector=dict(mode="markers"))
-#     fig.show()
-
-
 # Function to encode images in base64 for hover text
 def encode_image(image_path):
-    """
-    Encodes an image located at the given path into a base64 string.
-
-    This function reads an image from the specified path, converts it to a
-    base64-encoded string, and formats it as an HTML image tag. This is useful
-    for embedding images directly into HTML content, such as hover text in
-    interactive plots.
-
-    Args:
-        image_path (str): The file path to the image to be encoded.
-
-    Returns:
-        str: A base64-encoded string representing the image, formatted as an
-             HTML <img> tag with specified width and height.
-    """
     pil_img = Image.open(image_path)  # Open the image file
     buff = BytesIO()  # Create a buffer to hold the image data
     pil_img.save(buff, format="PNG")  # Save the image data to the buffer in PNG format
     img_str = base64.b64encode(buff.getvalue()).decode(
         "utf-8"
     )  # Encode the buffer data to base64
-    return f'<img src="data:image/png;base64,{img_str}" width="100" height="100">'  # Format as HTML <img> tag
+    return f'<img src="data:image/png;base64,{img_str}" width="100" height="100">'
 
 
 # Function to generate latent space visualization with image hovers and colored by label

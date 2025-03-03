@@ -38,7 +38,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CLASS_LABELS_4_CLASS = {0: "STOP", 1: "GO", 2: "RIGHT", 3: "LEFT"}
 CLASS_LABELS_2_CLASS = {0: "STOP", 1: "GO"}
 
-LATENT_STATS_PATH = "latent_vectors/combined_median_values.csv"
+# LATENT_STATS_PATH = "latent_vectors/combined_median_values.csv"
+LATENT_STATS_PATH = "latent_vectors/mean_values.csv"
 PLOT_DIR_2_CLASS = "plots/lime_on_latent_feature_graphs_2_class"
 PLOT_DIR_4_CLASS = "plots/lime_on_latent_feature_graphs_4_class"
 os.makedirs(PLOT_DIR_2_CLASS, exist_ok=True)
@@ -57,7 +58,8 @@ def load_latent_statistics():
         logging.warning(f"Median latent statistics not found at {LATENT_STATS_PATH}")
         return None  # No statistics available
 
-median_latent_values = load_latent_statistics()
+# median_latent_values = load_latent_statistics()
+mean_latent_vector = load_latent_statistics()
 
 # ------------------------------------------------------------------------------
 # Define Prediction Function for LIME
@@ -244,7 +246,7 @@ def process_lime_on_latent_masking(classifier_type: str = "4_class"):
         # Step 11: Apply Masking & Search for Counterfactual
         for feature_index, _ in important_features:
             masked_latent_vector = latent_vector.copy()
-            masked_latent_vector[feature_index] = median_latent_values[feature_index]  # Replace with median value
+            masked_latent_vector[feature_index] = mean_latent_vector[feature_index]  # Replace with median value
             selected_features.append(feature_index)
 
             masked_latent_tensor = torch.tensor(masked_latent_vector, dtype=torch.float32).to(device).unsqueeze(0)
@@ -263,7 +265,7 @@ def process_lime_on_latent_masking(classifier_type: str = "4_class"):
                 
                 metrics = calculate_image_metrics(input_image, reconstructed_image)
                 generate_lime_feature_importance_plot(image_filename, classifier_type, explanation, label_mapping)
-                generate_masked_features_plot(image_filename, classifier_type, selected_features, median_latent_values)
+                generate_masked_features_plot(image_filename, classifier_type, selected_features, mean_latent_vector)
                 break # Stop after finding the first counterfactual
 
         # Step 12: Calculate Processing Time

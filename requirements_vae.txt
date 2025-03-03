@@ -1,6 +1,6 @@
 # requirements_vae.txt
 # For VAE, masking, counterfactual explanations (Python 3.11.11)
-torch==2.5.0
+torch==2.6.0
 torchvision==0.20.0
 numpy==2.0.2
 matplotlib==3.9.2
@@ -15,6 +15,7 @@ tensorboard==2.17.1
 sewar==0.4.6
 torchviz==0.0.3
 scipy==1.15.2
+six ==1.17.0
 
 # For fastapi
 fastapi == 0.115.8

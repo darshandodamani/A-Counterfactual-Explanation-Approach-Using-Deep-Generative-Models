@@ -1,6 +1,7 @@
 # Ignore virtual environments
 venv_carla/   
-venv_vae/   
+venv_vae/
+venv_test/ 
 
 # Byte-compilation and other optimizations
 __pycache__/
