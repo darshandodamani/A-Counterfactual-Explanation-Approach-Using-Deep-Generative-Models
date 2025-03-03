@@ -197,6 +197,9 @@ def main() -> None:
     1. Computes the counterfactual explanation summaries.
     2. Loads the result CSVs for each class type.
     3. Generates the methods overlap comparison table, Venn diagram, and bar chart.
+    4. Additionally, for each class type, saves a CSV file containing the intersection of images
+       explained by Grid-Based Masking, LIME on Latent Features, and LIME on Images along with
+       their predictions.
     """
     # Process both "2_class" and "4_class" by default
     class_types = list(methods_results.keys())
@@ -250,6 +253,20 @@ def main() -> None:
         }
         generate_venn_diagram(venn_sets, venn_diagram_path)
         generate_bar_chart(grid_ce, lime_latent_ce, lime_image_ce, object_detection_ce, bar_chart_path)
+
+        # --------------------------------------------------------------------------
+        # Save CSV for Intersection of Grid-Based, LIME on Latent, and LIME on Images
+        # --------------------------------------------------------------------------
+        # Compute intersection of images explained by Grid-Based, LIME on Latent, and LIME on Images
+        intersection_images = grid_ce.intersection(lime_latent_ce).intersection(lime_image_ce)
+        if intersection_images:
+            # For these images, we extract the predictions from the grid-based results (assumed to be representative)
+            intersection_df = grid_df[grid_df["Image File"].isin(intersection_images)][["Image File", "Prediction (Before Masking)", "Prediction (After Masking)"]]
+            intersection_csv_path = os.path.join(BASE_METHOD_COMPARISON_DIR, f"intersection_combined_{class_type}.csv")
+            intersection_df.to_csv(intersection_csv_path, index=False)
+            logging.info(f"Intersection CSV saved as '{os.path.abspath(intersection_csv_path)}'")
+        else:
+            logging.info("No intersection found for Grid-Based, LIME on Latent, and LIME on Images.")
 
     print("\nAll CE summaries and visualizations have been successfully generated.")
 
