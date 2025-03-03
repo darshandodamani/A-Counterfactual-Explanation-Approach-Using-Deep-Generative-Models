@@ -186,9 +186,9 @@ def save_images(image_filename: str, input_image: torch.Tensor, masked_image: to
     
     base_filename, _ = os.path.splitext(image_filename)
     
-    original_pil.save(os.path.join(output_dirs["original"], f"{base_filename}_original.png"))
-    masked_pil.save(os.path.join(output_dirs["masked"], f"{base_filename}_masked.png"))
-    reconstructed_pil.save(os.path.join(output_dirs["reconstructed"], f"{base_filename}_reconstructed.png"))
+    original_pil.save(os.path.join(output_dirs["original"], f"{base_filename}.png"))
+    masked_pil.save(os.path.join(output_dirs["masked"], f"{base_filename}.png"))
+    reconstructed_pil.save(os.path.join(output_dirs["reconstructed"], f"{base_filename}.png"))
     
     logging.info(f"Saved images for {image_filename}")
     
@@ -205,8 +205,8 @@ def save_images_without_mask(image_filename: str, input_image: torch.Tensor, rec
 
     base_filename, _ = os.path.splitext(image_filename)
 
-    original_pil.save(os.path.join(output_dirs["original"], f"{base_filename}_original.png"))
-    reconstructed_pil.save(os.path.join(output_dirs["reconstructed"], f"{base_filename}_reconstructed.png"))
+    original_pil.save(os.path.join(output_dirs["original"], f"{base_filename}.png"))
+    reconstructed_pil.save(os.path.join(output_dirs["reconstructed"], f"{base_filename}.png"))
 
     logging.info(f" Saved original & reconstructed images for {image_filename} (No masked image)")
 

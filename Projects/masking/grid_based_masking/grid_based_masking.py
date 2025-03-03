@@ -184,7 +184,7 @@ def process_grid_based_masking(classifier_type: str = "4_class"):
             }, output_csv
         )
 
-        logging.info(f"✅ Updated CSV for image {image_filename} (Classifier: {classifier_type})")
+        logging.info(f" Updated CSV for image {image_filename} (Classifier: {classifier_type})")
 
 if __name__ == "__main__":
     process_grid_based_masking()

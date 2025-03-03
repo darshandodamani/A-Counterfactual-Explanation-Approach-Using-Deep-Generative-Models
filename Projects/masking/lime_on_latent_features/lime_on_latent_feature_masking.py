@@ -209,6 +209,11 @@ def process_lime_on_latent_masking(classifier_type: str = "4_class"):
 
         input_image = transforms.ToTensor()(pil_image).unsqueeze(0).to(device)
 
+        # Save the original image
+        original_image_path = os.path.join(IMAGE_DIRS["original"], image_filename)
+        pil_image.save(original_image_path)
+        logging.info(f"Saved original image at {original_image_path}")
+
         # Step 7: Extract Latent Features
         latent_vector = encoder(input_image)[2].cpu().detach().numpy().reshape(-1)
 
@@ -266,6 +271,13 @@ def process_lime_on_latent_masking(classifier_type: str = "4_class"):
                 metrics = calculate_image_metrics(input_image, reconstructed_image)
                 generate_lime_feature_importance_plot(image_filename, classifier_type, explanation, label_mapping)
                 generate_masked_features_plot(image_filename, classifier_type, selected_features, mean_latent_vector)
+                
+                # Save the reconstructed image
+                reconstructed_image_path = os.path.join(IMAGE_DIRS["reconstructed"], image_filename)
+                reconstructed_image_pil = transforms.ToPILImage()(reconstructed_image.squeeze().cpu())
+                reconstructed_image_pil.save(reconstructed_image_path)
+                logging.info(f"Saved reconstructed image at {reconstructed_image_path}")
+
                 break # Stop after finding the first counterfactual
 
         # Step 12: Calculate Processing Time
