@@ -28,7 +28,7 @@ dataset/Town07_dataset/
 settings.json
 
 # Igonew latent_space folder
-latent_vectors/
+# latent_vectors/
 
 # Ignore the entire model folder under Projects/masking/object-detection
 Projects/masking/object-detection/model/
