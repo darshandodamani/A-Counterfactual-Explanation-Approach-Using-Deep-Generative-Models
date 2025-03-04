@@ -102,7 +102,13 @@ python split_dataset.py --data_path <path_to_dataset> --train_ratio 0.8
 - **Parameters**:
   - `--train_ratio`: Ratio of the data to use for training (default: 0.8).
 
-## Running the Web Application
+### Download the Models from Hugging Face
+
+Download the models from [Hugging Face](https://huggingface.co/darshandodamani/VAE_models/tree/main) and place them in the `model/epochs_500_latent_128_town_7/` directory.
+
+The models are located in the `model/epochs_500_latent_128_town_7/` directory on Hugging Face.
+
+### Running the Web Application
 
 Follow these steps to run the web application locally:
 
@@ -112,7 +118,7 @@ uvicorn Projects.counterfactual_comparison.app:app --reload
 
 This runs the app in development mode with auto-reload enabled. The app will be accessible at http://127.0.0.1:8000.
 
-## Access the App in Your Browser
+#### Access the App in Your Browser
 
 - Open your browser and go to http://127.0.0.1:8000/ to view the welcome page.
 - Click the Start Evaluation button to begin the counterfactual explanation evaluation.
