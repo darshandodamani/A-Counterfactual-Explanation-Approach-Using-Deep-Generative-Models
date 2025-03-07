@@ -38,4 +38,4 @@ Projects/masking/object-detection/model/
 model/epochs_500_latent_128_town_7/yolov5s.pt
 
 # Also ignore any yolov5s.pt file at the repository root
-yolov5s.pt
+model/epochs_500_latent_128_town_7/*.pth
