@@ -1,0 +1,10 @@
+              precision    recall  f1-score   support
+
+        STOP       0.91      0.99      0.95       821
+          GO       0.81      0.84      0.83       821
+       RIGHT       0.93      0.86      0.89       821
+        LEFT       0.93      0.89      0.91       821
+
+    accuracy                           0.89      3284
+   macro avg       0.90      0.89      0.89      3284
+weighted avg       0.90      0.89      0.89      3284
