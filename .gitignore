@@ -33,9 +33,5 @@ settings.json
 # Ignore the entire model folder under Projects/masking/object-detection
 Projects/masking/object-detection/model/
 
-# If you need to keep your custom models in model/epochs_500_latent_128_town_7,
-# but want to ignore the yolov5s.pt file there, add:
-model/epochs_500_latent_128_town_7/yolov5s.pt
-
-# Also ignore any yolov5s.pt file at the repository root
-model/epochs_500_latent_128_town_7/*.pth
+# Ignore the model/ directory
+model/
