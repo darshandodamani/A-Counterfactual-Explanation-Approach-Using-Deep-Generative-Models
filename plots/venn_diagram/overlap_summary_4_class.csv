@@ -1,0 +1,18 @@
+Category,Number of Images,Percentage (%)
+Total Images,2312,100
+Only Grid-Based Masking,5,0.22
+Only LIME on Latent Features,0,0.00
+Only LIME on Images,0,0.00
+Only LIME on Latent NUN,10,0.43
+Grid-Based + LIME on Latent Features,1,0.04
+Grid-Based + LIME on Images,52,2.25
+Grid-Based + LIME on Latent NUN,233,10.08
+LIME on Latent Features + LIME on Images,0,0.00
+LIME on Latent Features + LIME on Latent NUN,0,0.00
+LIME on Images + LIME on Latent NUN,0,0.00
+Grid-Based + LIME on Latent + LIME on Images,1,0.04
+Grid-Based + LIME on Latent + LIME on Latent NUN,33,1.43
+Grid-Based + LIME on Images + LIME on Latent NUN,1811,78.33
+LIME on Latent + LIME on Images + LIME on Latent NUN,0,0.00
+All Four Methods,166,7.18
+Not Explained by Any Method,0,0.00

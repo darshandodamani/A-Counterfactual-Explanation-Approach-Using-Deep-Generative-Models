@@ -3,6 +3,10 @@ import sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # ------------------------------------------------------------------------------
 # Define Class Types to Process (2_class and 4_class)
@@ -22,7 +26,8 @@ for class_type in class_types:
         "Grid-Based Masking": f"results/masking/grid_based/grid_based_masking_{class_suffix}_results.csv",
         "Object Detection": f"results/masking/object_detection/object_detection_masking_{class_suffix}_results.csv",
         "LIME on Images": f"results/masking/lime_on_images/lime_on_image_masking_{class_suffix}_results.csv",
-        "LIME on Latent Features": f"results/masking/lime_on_latent/lime_on_latent_masking_{class_suffix}_results.csv"
+        "LIME on Latent Features": f"results/masking/lime_on_latent/lime_on_latent_masking_{class_suffix}_results.csv",
+        "LIME on Latent NUN": f"results/masking/lime_on_latent/{class_suffix}_NUN_results.csv"
     }
 
     # Define output directories for plots and results specific to the class type
@@ -36,28 +41,50 @@ for class_type in class_types:
     # ------------------------------------------------------------------------------
     df_list = []
     for method, filepath in METHODS_FILES.items():
-        if os.path.exists(filepath):
-            df = pd.read_csv(filepath)
-            df["Method"] = method  # add method column
-            df_list.append(df)
-        else:
-            print(f"⚠ Warning: {filepath} not found. Skipping...")
-    
+        try:
+            if os.path.exists(filepath):
+                df = pd.read_csv(filepath)
+                df["Method"] = method  # add method column
+                df_list.append(df)
+                logging.info(f"Loaded {method} results from {filepath}")
+            else:
+                logging.warning(f" Warning: {filepath} not found. Skipping {method}...")
+        except Exception as e:
+            logging.error(f"Error loading {filepath}: {e}")
+
     if not df_list:
-        print(f"No data loaded for {class_type}. Skipping this class type.")
+        logging.warning(f"No data loaded for {class_type}. Skipping this class type.")
         continue
 
     # Merge data from all methods
     df = pd.concat(df_list, ignore_index=True)
 
+    # Check if all methods are included
+    loaded_methods = df["Method"].unique()
+    for method in METHODS_FILES.keys():
+        if method not in loaded_methods:
+            logging.warning(f"Method {method} not found in the loaded data.")
+
+    # Check if the required columns exist
+    required_columns = ["Method", "Image File", "Counterfactual Found", "PSNR", "SSIM", "MSE", "UQI", "VIFP"]
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        logging.error(f"Missing columns in the data: {missing_columns}")
+        continue
+
     # ------------------------------------------------------------------------------
     # Data Preprocessing
     # ------------------------------------------------------------------------------
     # Select only the relevant columns
-    df = df[["Method", "Image File", "Counterfactual Found", "PSNR", "SSIM", "MSE", "UQI", "VIFP"]]
+    df = df[required_columns]
 
     # Filter rows where Counterfactual Found == True
     df_true = df[df["Counterfactual Found"] == True]
+
+    # Check if there are any rows where Counterfactual Found == True
+    if df_true.empty:
+        logging.warning(f"No rows where Counterfactual Found == True for {class_type}. Skipping this class type.")
+        continue
 
     # ------------------------------------------------------------------------------
     # Function: Save Boxplots (with Legends)
@@ -69,18 +96,18 @@ for class_type in class_types:
         Args:
             metric (str): The metric to plot (e.g., "PSNR", "SSIM").
         """
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(12, 6))  # Increased width to accommodate more methods
         # Use 'Counterfactual Found' as the x-axis (will be True for all rows)
         # and use hue="Method" to display the different methods along with a legend.
         sns.boxplot(data=df_true, x="Counterfactual Found", y=metric, hue="Method")
         plt.title(f"{metric} vs. Counterfactual Found for {class_type}", fontsize=14)
         plt.xlabel("Counterfactual Found", fontsize=12)
         plt.ylabel(metric, fontsize=12)
-        plt.legend(title="Method", fontsize=10)
+        plt.legend(title="Method", fontsize=10, loc='upper left', bbox_to_anchor=(1, 1))
         plot_path = os.path.join(PLOTS_DIR, f"{metric.lower()}_boxplot_{class_type}.png")
         plt.savefig(plot_path, bbox_inches='tight')
         plt.close()
-        print(f" {metric} boxplot saved at: {plot_path}")
+        logging.info(f" {metric} boxplot saved at: {plot_path}")
 
     # Generate and save boxplots for each metric
     for metric in ["PSNR", "SSIM", "MSE", "UQI", "VIFP"]:
@@ -100,9 +127,13 @@ for class_type in class_types:
     # Flatten MultiIndex columns
     summary.columns = [' '.join(col).strip() if isinstance(col, tuple) else col for col in summary.columns]
 
+    # Check if all methods are included in the summary
+    if len(summary) != len(METHODS_FILES):
+        logging.warning(f"Some methods are missing in the summary for {class_type}. Expected {len(METHODS_FILES)}, got {len(summary)}.")
+
     # ------------------------------------------------------------------------------
     # Save Summary as CSV
     # ------------------------------------------------------------------------------
     csv_path = os.path.join(RESULTS_DIR, f"sanity_check_image_vs_ce_metrics_{class_type}.csv")
     summary.to_csv(csv_path, index=False)
-    print(f"Sanity check summary saved to:\n CSV: {csv_path}\n")
+    logging.info(f"Sanity check summary saved to:\n CSV: {csv_path}\n")

@@ -37,6 +37,8 @@ METHODS_RESULTS: Dict[str, str] = {
     "object_detection_4_class": "results/masking/object_detection/object_detection_masking_4_classes_results.csv", 
     "lime_on_latent_feature_2_class": "results/masking/lime_on_latent/lime_on_latent_masking_2_classes_results.csv",
     "lime_on_latent_feature_4_class": "results/masking/lime_on_latent/lime_on_latent_masking_4_classes_results.csv",
+     "lime_on_latent_feature_2_class_NUN": "results/masking/lime_on_latent/2_class_NUN_results.csv",
+    "lime_on_latent_feature_4_class_NUN": "results/masking/lime_on_latent/4_class_NUN_results.csv",
     "shap_on_latent_feature_2_class": "results/masking/lime_on_latent/shap_on_latent_masking_2_classes_results.csv",
     "shap_on_latent_feature_4_class": "results/masking/lime_on_latent/shap_on_latent_masking_4_classes_results.csv"
 }
@@ -45,6 +47,18 @@ METHODS_RESULTS: Dict[str, str] = {
 # Column headers for each method
 # ----------------------------------------------------------------------------
 METHODS_HEADERS: Dict[str, list] = {
+    "lime_on_latent_feature_2_class_NUN": [
+        "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
+        "Prediction (After Masking)", "Confidence (After Masking)", 
+        "Counterfactual Found", "Features Replaced", "Feature Selection (%)",
+        "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+    ],
+    "lime_on_latent_feature_4_class_NUN": [
+        "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
+        "Prediction (After Masking)", "Confidence (After Masking)", 
+        "Counterfactual Found", "Features Replaced", "Feature Selection (%)",
+        "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+    ],
     "grid_based_2_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
@@ -223,7 +237,9 @@ def update_results_csv(method: str, image_filename: str, results: Dict[str, Any]
     # Ensure proper type casting before updating DataFrame
     formatted_results = {}
     for key, value in results.items():
-        if isinstance(value, bool):  
+        if key == "Image File":
+            formatted_results[key] = image_filename
+        elif isinstance(value, bool):  
             formatted_results[key] = bool(value)  # Explicitly cast to bool
         elif isinstance(value, (int, float, np.float64, np.int64)):  
             formatted_results[key] = float(value)  # Explicitly cast to float
@@ -342,34 +358,34 @@ def process_lime_on_latent_masking():
         p.join()
         logging.info("Completed LIME on Latent masking.")
         
-def process_shap_on_latent_masking():
+def process_lime_on_latent_nun_masking():
     """
-    Calls the LIME on Latent masking script and executes the process.
+    Calls the LIME on Latent masking script using NUN and executes the process.
     """
-    from lime_on_latent_features.shap_on_latent_feature_masking import process_shap_on_latent_masking
+    from lime_on_latent_features.lime_on_latent_feature_masking_using_NUN import process_lime_on_latent_masking_nun
     classifer_types = ["2_class", "4_class"]
     
     processes = []
     for classifier_type in classifer_types:
-        logging.info(f"Starting LIME on Latent masking for {classifier_type} in parallel.")
-        p = multiprocessing.Process(target=process_shap_on_latent_masking, args=(classifier_type,))
+        logging.info(f"Starting LIME on Latent masking using NUN for {classifier_type} in parallel.")
+        p = multiprocessing.Process(target=process_lime_on_latent_masking_nun, args=(classifier_type,))
         processes.append(p)
         p.start()
         
     for p in processes:
         p.join()
-        logging.info("Completed LIME on Latent masking.")
+        logging.info(f"Completed LIME on Latent masking using NUN for {classifier_type}.")
         
 def run_parallel_masking():
     """
     Runs all masking methods in parallel using multiprocessing.
     """
     methods = {
-        "grid_based": process_grid_based_masking,
-        "object_detection": process_object_detection_based_masking,
-        "lime_on_image": process_lime_on_image_masking,
-        "lime_on_latent": process_lime_on_latent_masking,
-        # "shap_on_latent": process_shap_on_latent_masking
+        # "grid_based": process_grid_based_masking,
+        # "object_detection": process_object_detection_based_masking,
+        # "lime_on_image": process_lime_on_image_masking,
+        # "lime_on_latent": process_lime_on_latent_masking,
+        "lime_on_latent_nun": process_lime_on_latent_nun_masking,
     }
     
     processes = []

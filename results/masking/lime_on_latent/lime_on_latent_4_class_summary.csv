@@ -1,2 +1,2 @@
 Method,Total,Total STOP,STOP CE Found,STOP CE Found (%),STOP CE Not Found,STOP CE Not Found (%),Total GO,GO CE Found,GO CE Found (%),GO CE Not Found,GO CE Not Found (%),Total LEFT,LEFT CE Found,LEFT CE Found (%),LEFT CE Not Found,LEFT CE Not Found (%),Total RIGHT,RIGHT CE Found,RIGHT CE Found (%),RIGHT CE Not Found,RIGHT CE Not Found (%),Total CE Found,Total CE Found (%),Total CE Not Found,Total CE Not Found (%),Total Time Taken (s),Total Time Taken (min)
-lime_on_latent,2326,891,74,8.31%,817,91.69%,996,69,6.93%,927,93.07%,230,28,12.17%,202,87.83%,209,40,19.14%,169,80.86%,211,9.07%,2115,90.93%,4646.66,77.44
+lime_on_latent,2312,888,71,8.00%,817,92.00%,988,64,6.48%,924,93.52%,230,28,12.17%,202,87.83%,206,38,18.45%,168,81.55%,201,8.69%,2111,91.31%,4553.82,75.9
