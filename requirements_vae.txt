@@ -25,3 +25,5 @@ python-multipart==0.0.20
 
 # For venn diagram
 venny4py==1.0.3
+
+# pyvenn needs to be installed manually from https://github.com/tctianchi/pyvenn.git
