@@ -1,4 +1,4 @@
-# collect_images.py
+# location: carla_dataset_collection/collect_images.py
 import carla
 import random
 import time
