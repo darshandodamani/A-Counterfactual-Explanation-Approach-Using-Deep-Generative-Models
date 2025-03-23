@@ -11,12 +11,13 @@ pandas==2.2.2
 seaborn==0.13.2
 scikit-image==0.24.0
 plantuml==0.3.0
-tensorboard==2.17.1
+tensorboard==2.19.0
 sewar==0.4.6
 torchviz==0.0.3
 scipy==1.15.2
 six ==1.17.0
 IPyhton==9.0.1
+tensorflow==2.19.0
 
 # For fastapi
 fastapi == 0.115.8
@@ -25,5 +26,3 @@ python-multipart==0.0.20
 
 # For venn diagram
 venny4py==1.0.3
-
-# pyvenn needs to be installed manually from https://github.com/tctianchi/pyvenn.git
