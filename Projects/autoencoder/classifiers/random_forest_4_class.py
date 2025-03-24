@@ -9,7 +9,7 @@ import sys
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from PIL import Image
-from sklearn import neighbors
+from sklearn import ensemble
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
 from sklearn.preprocessing import label_binarize
 
@@ -37,8 +37,8 @@ test_img_dir  = "dataset/town7_dataset/test/"
 
 # Path to the saved VAE encoder
 encoder_path = "model/epochs_500_latent_128_town_7/var_encoder_model.pth"
-# Path where the trained KNN classifier will be saved (as a .pth file)
-classifier_save_path = os.path.join(MODEL_DIR, "knn_classifier_4_classes.pth")
+# Path where the trained Random Forest classifier will be saved (as a .pth file)
+classifier_save_path = os.path.join(MODEL_DIR, "rf_classifier_4_classes.pth")
 
 # ------------------------------------------------------------------------------
 # Dataset Definition
@@ -118,16 +118,16 @@ print(f"Training samples: {X_train.shape[0]}")
 print(f"Test samples: {X_test.shape[0]}")
 
 # ------------------------------------------------------------------------------
-# Train KNN Classifier
+# Train Random Forest Classifier
 # ------------------------------------------------------------------------------
-knn_classifier = neighbors.KNeighborsClassifier(n_neighbors=5)
-knn_classifier.fit(X_train, y_train)
+rf_classifier = ensemble.RandomForestClassifier(n_estimators=100, random_state=42)
+rf_classifier.fit(X_train, y_train)
 
 # ------------------------------------------------------------------------------
 # Evaluation
 # ------------------------------------------------------------------------------
 # Predictions and classification report
-y_pred = knn_classifier.predict(X_test)
+y_pred = rf_classifier.predict(X_test)
 print("Classification Report:")
 print(classification_report(y_test, y_pred, target_names=CLASS_NAMES))
 
@@ -138,15 +138,15 @@ sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
             xticklabels=CLASS_NAMES, yticklabels=CLASS_NAMES)
 plt.xlabel("Predicted")
 plt.ylabel("True")
-plt.title("Confusion Matrix for KNN Classifier (4 Classes)")
-cm_path = os.path.join(PLOTS_DIR, "knn_confusion_matrix.png")
+plt.title("Confusion Matrix for Random Forest Classifier (4 Classes)")
+cm_path = os.path.join(PLOTS_DIR, "rf_confusion_matrix.png")
 plt.savefig(cm_path)
 
 # ROC Curves (One-vs-Rest)
 # Binarize labels for ROC computation
 y_test_bin = label_binarize(y_test, classes=[0, 1, 2, 3])
 n_classes = y_test_bin.shape[1]
-y_score = knn_classifier.predict_proba(X_test)
+y_score = rf_classifier.predict_proba(X_test)
 
 plt.figure()
 colors = ['blue', 'red', 'green', 'orange']
@@ -159,14 +159,14 @@ plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
 plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
-plt.title("ROC Curves for KNN Classifier (4 Classes)")
+plt.title("ROC Curves for Random Forest Classifier (4 Classes)")
 plt.legend(loc="lower right")
-roc_path = os.path.join(PLOTS_DIR, "knn_roc_curve.png")
+roc_path = os.path.join(PLOTS_DIR, "rf_roc_curve.png")
 plt.savefig(roc_path)
 
 # ------------------------------------------------------------------------------
-# Save the Trained KNN Classifier as a .pth File
+# Save the Trained Random Forest Classifier as a .pth File
 # ------------------------------------------------------------------------------
-# Note: Although KNN is not a PyTorch module, torch.save() uses pickle under the hood.
-torch.save(knn_classifier, classifier_save_path)
-print(f"KNN classifier saved at: {classifier_save_path}")
+# Note: Although Random Forest is not a PyTorch module, torch.save() uses pickle under the hood.
+torch.save(rf_classifier, classifier_save_path)
+print(f"Random Forest classifier saved at: {classifier_save_path}")
