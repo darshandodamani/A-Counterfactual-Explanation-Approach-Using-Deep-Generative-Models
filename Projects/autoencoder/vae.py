@@ -23,10 +23,10 @@ import sys
 
 # Hyper-parameters
 NUM_EPOCHS = 500
-BATCH_SIZE = 256  # Increase to stabilize training
-LEARNING_RATE = 1e-4  # Keep the learning rate, but consider reducing it mid-training
-LATENT_SPACE = 128  # Reduce latent space for compression
-KL_WEIGHT_INITIAL = 0.00005  # Initial KL weight
+BATCH_SIZE = 256
+LEARNING_RATE = 1e-4
+LATENT_SPACE = 128
+KL_WEIGHT_INITIAL = 0.00005
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -48,13 +48,13 @@ class VariationalAutoencoder(nn.Module):
 
     def forward(self, x):
         print(f"Running forward pass on the input of shape: {x.shape}")
-        mu, logvar, z = self.encoder(x.to(device))  # Get mu, logvar, z from encoder
+        mu, logvar, z = self.encoder(x.to(device))
         return (
             self.decoder(z),
             mu,
             logvar,
             z,
-        )  # Return decoded image and latent variables
+        )
 
     def save(self):
         print(f"Saving model to {self.model_file}")
@@ -94,7 +94,7 @@ class CustomImageDatasetWithLabels(torch.utils.data.Dataset):
         image = Image.open(img_path).convert("RGB")
         if self.transform:
             image = self.transform(image)
-        return image, label, img_path  # Return img_path along with image and label
+        return image, label, img_path
 
 
 # KL divergence function
@@ -117,14 +117,14 @@ def train(model, trainloader, optimizer, epoch, kl_weight):
     mse_loss_total = 0.0
     kl_loss_total = 0.0
     all_z_values = []
-    all_image_paths = []  # Store image paths corresponding to each z value
+    all_image_paths = []
     for batch_idx, (x, _, image_paths) in enumerate(trainloader):
         x = x.to(device)
-        x_hat, mu, logvar, z = model(x)  # Forward pass through the VAE
+        x_hat, mu, logvar, z = model(x)
 
         # Store z values for this batch
-        all_z_values.append(z.cpu().detach())  # Store z values
-        all_image_paths.extend(image_paths)  # Store corresponding image paths
+        all_z_values.append(z.cpu().detach())
+        all_image_paths.extend(image_paths)
 
         # Resize the output (x_hat) to match the input size (x) before computing the loss
         x_hat = F.interpolate(
@@ -157,7 +157,7 @@ def train(model, trainloader, optimizer, epoch, kl_weight):
             save_reconstructions(model, trainloader, epoch)
 
     # Save all z values to CSV after the epoch
-    z_values_tensor = torch.cat(all_z_values, dim=0)  # Concatenate all batch z values
+    z_values_tensor = torch.cat(all_z_values, dim=0)
     save_z_to_csv(z_values_tensor, all_image_paths, epoch)
 
     avg_train_loss = train_loss / len(trainloader.dataset)
@@ -193,7 +193,7 @@ def save_reconstructions(model, trainloader, epoch):
             if len(data) == 2:
                 x, _ = data
             elif len(data) == 3:
-                x, _, _ = data  # Adjust this based on what trainloader returns
+                x, _, _ = data
             else:
                 raise ValueError("Unexpected number of values returned by trainloader")
 
@@ -202,7 +202,7 @@ def save_reconstructions(model, trainloader, epoch):
 
             # Plot original and reconstructed images side by side
             plt.figure(figsize=(8, 4))
-            for i in range(min(4, x.size(0))):  # Use `x.size(0)` to get the batch size
+            for i in range(min(4, x.size(0))):
                 original = x[i].cpu().numpy().transpose(1, 2, 0)
                 reconstructed = x_hat[i].cpu().detach().numpy().transpose(1, 2, 0)
 
@@ -225,14 +225,14 @@ def save_reconstructions(model, trainloader, epoch):
 
             plt.savefig(f"{save_dir}/reconstructed_epoch_{epoch}.png")
             plt.close()
-            break  # Save reconstructions for the first batch only
+            break
 
 
 # Function to encode images in base64 for hover text
 def encode_image(image_path):
-    pil_img = Image.open(image_path)  # Open the image file
-    buff = BytesIO()  # Create a buffer to hold the image data
-    pil_img.save(buff, format="PNG")  # Save the image data to the buffer in PNG format
+    pil_img = Image.open(image_path)
+    buff = BytesIO()
+    pil_img.save(buff, format="PNG")
     img_str = base64.b64encode(buff.getvalue()).decode(
         "utf-8"
     )  # Encode the buffer data to base64
@@ -415,11 +415,11 @@ def main():
     )
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
 
-    kl_weight = KL_WEIGHT_INITIAL  # Start with a small KL weight
+    kl_weight = KL_WEIGHT_INITIAL
 
-    patience = 50  # Stop training if no improvement for 50 epochs
-    best_val_loss = float("inf")  # Initialize best_val_loss to infinity
-    patience_counter = 0  # Counter for patience
+    patience = 50
+    best_val_loss = float("inf")
+    patience_counter = 0
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, "min", patience=10, factor=0.5, verbose=True
@@ -471,8 +471,8 @@ def main():
 
         # Check if this is the best validation loss so far
         if val_loss < best_val_loss:
-            best_val_loss = val_loss  # Update best validation loss
-            patience_counter = 0  # Reset patience counter
+            best_val_loss = val_loss
+            patience_counter = 0
             print(f"New best validation loss: {best_val_loss:.3f}")
         else:
             patience_counter += 1
@@ -515,8 +515,6 @@ def main():
     # Save latent space visualization with hoverable images and labels
     csv_filename = f"latent_{LATENT_SPACE}_values_epoch_{NUM_EPOCHS - 1}.csv"  # Assuming final epoch
     visualize_with_hover_images(csv_filename)
-    # Visualize latent space
-    # visualize_latent_space(z_values_tensor, all_image_paths)  # Call with final z values
 
 
 if __name__ == "__main__":
