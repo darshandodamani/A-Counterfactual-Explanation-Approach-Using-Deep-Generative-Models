@@ -19,12 +19,15 @@ town7_000101.png,True,False,True,True
 town7_000103.png,True,False,False,True
 town7_000104.png,False,False,False,True
 town7_000109.png,False,False,False,True
+town7_000116.png,True,True,True,True
 town7_000127.png,True,True,True,True
 town7_000128.png,True,True,True,True
 town7_000129.png,True,True,True,True
 town7_000130.png,True,True,True,True
 town7_000139.png,True,True,True,True
 town7_000140.png,True,True,True,True
+town7_000141.png,True,True,False,True
+town7_000144.png,True,True,True,True
 town7_000146.png,True,False,False,True
 town7_000154.png,True,False,False,True
 town7_000156.png,True,False,False,True
@@ -176,6 +179,7 @@ town7_000900.png,True,False,False,True
 town7_000901.png,True,False,False,True
 town7_000905.png,True,False,False,False
 town7_000908.png,True,False,False,True
+town7_000913.png,True,True,True,True
 town7_000919.png,True,False,False,True
 town7_000922.png,True,False,False,True
 town7_000935.png,True,False,False,False
@@ -236,6 +240,7 @@ town7_001218.png,True,False,False,True
 town7_001221.png,True,False,False,False
 town7_001223.png,True,False,False,True
 town7_001227.png,True,True,True,True
+town7_001228.png,True,True,True,True
 town7_001233.png,True,True,True,True
 town7_001236.png,True,True,True,True
 town7_001246.png,True,False,False,False
@@ -272,6 +277,7 @@ town7_001428.png,False,False,False,True
 town7_001431.png,False,False,False,True
 town7_001444.png,True,False,True,True
 town7_001456.png,True,False,True,True
+town7_001462.png,True,True,True,True
 town7_001463.png,True,True,True,True
 town7_001467.png,True,True,False,True
 town7_001469.png,True,False,False,True
@@ -300,6 +306,7 @@ town7_001592.png,True,False,False,True
 town7_001595.png,True,False,False,True
 town7_001605.png,True,False,False,True
 town7_001608.png,True,False,False,False
+town7_001612.png,True,True,True,True
 town7_001613.png,True,False,True,True
 town7_001616.png,True,True,True,True
 town7_001620.png,True,False,True,True
@@ -340,6 +347,7 @@ town7_001789.png,False,False,False,True
 town7_001793.png,True,False,False,True
 town7_001818.png,False,False,False,True
 town7_001822.png,True,False,False,True
+town7_001832.png,True,True,True,True
 town7_001833.png,True,False,True,True
 town7_001834.png,True,False,True,True
 town7_001843.png,True,False,True,True
@@ -439,6 +447,7 @@ town7_002358.png,False,False,False,False
 town7_002363.png,True,False,False,True
 town7_002371.png,False,False,False,True
 town7_002378.png,True,False,False,True
+town7_002389.png,True,True,True,True
 town7_002395.png,True,False,False,True
 town7_002396.png,True,False,False,True
 town7_002399.png,True,False,False,True
@@ -460,6 +469,8 @@ town7_002494.png,False,False,False,True
 town7_002499.png,False,False,False,True
 town7_002505.png,False,False,False,True
 town7_002510.png,True,False,False,True
+town7_002511.png,True,True,False,True
+town7_002512.png,True,False,False,True
 town7_002519.png,True,False,True,True
 town7_002521.png,True,False,True,True
 town7_002523.png,True,False,True,True
@@ -511,6 +522,7 @@ town7_002728.png,True,False,True,True
 town7_002731.png,True,False,True,True
 town7_002736.png,True,False,True,True
 town7_002746.png,True,False,True,True
+town7_002747.png,True,True,False,True
 town7_002748.png,True,True,False,True
 town7_002753.png,False,False,False,True
 town7_002764.png,False,False,False,True
@@ -526,6 +538,7 @@ town7_002801.png,True,False,True,True
 town7_002802.png,True,False,True,True
 town7_002806.png,True,False,True,True
 town7_002814.png,True,False,True,True
+town7_002818.png,True,True,False,True
 town7_002819.png,True,True,False,True
 town7_002824.png,True,False,False,True
 town7_002825.png,False,False,False,True
@@ -574,6 +587,7 @@ town7_003082.png,True,False,True,True
 town7_003083.png,True,False,True,True
 town7_003084.png,True,False,True,True
 town7_003085.png,True,False,True,True
+town7_003094.png,True,True,True,True
 town7_003096.png,True,False,False,True
 town7_003102.png,False,False,False,True
 town7_003105.png,False,False,False,True
@@ -646,6 +660,7 @@ town7_003447.png,False,False,False,True
 town7_003453.png,True,False,False,True
 town7_003454.png,True,False,False,True
 town7_003457.png,True,True,False,True
+town7_003459.png,True,False,True,True
 town7_003460.png,True,False,False,True
 town7_003469.png,True,False,False,False
 town7_003470.png,False,False,False,False
@@ -700,6 +715,7 @@ town7_003701.png,False,False,False,True
 town7_003702.png,False,False,False,True
 town7_003704.png,False,False,False,True
 town7_003710.png,True,False,False,True
+town7_003713.png,True,False,True,True
 town7_003719.png,True,True,True,True
 town7_003727.png,True,False,False,True
 town7_003737.png,True,False,False,True
@@ -741,6 +757,8 @@ town7_003906.png,False,False,False,True
 town7_003910.png,False,False,False,True
 town7_003912.png,False,False,False,True
 town7_003919.png,True,False,False,True
+town7_003930.png,True,True,False,True
+town7_003931.png,True,True,True,True
 town7_003934.png,True,False,True,True
 town7_003945.png,True,False,True,True
 town7_003954.png,False,False,False,True
@@ -757,13 +775,16 @@ town7_003986.png,True,True,True,True
 town7_003989.png,True,False,False,True
 town7_003996.png,True,True,False,True
 town7_004002.png,False,False,False,True
+town7_004006.png,True,True,False,True
 town7_004008.png,True,False,False,True
+town7_004010.png,True,True,True,True
 town7_004013.png,True,False,False,True
 town7_004014.png,True,False,False,False
 town7_004015.png,True,False,False,True
 town7_004022.png,False,False,False,True
 town7_004025.png,True,False,False,True
 town7_004027.png,True,False,False,True
+town7_004029.png,True,True,False,True
 town7_004032.png,True,False,False,True
 town7_004048.png,True,False,False,True
 town7_004049.png,False,False,False,True
@@ -779,11 +800,13 @@ town7_004078.png,True,False,True,True
 town7_004094.png,False,False,False,True
 town7_004096.png,False,False,False,True
 town7_004097.png,False,False,False,True
+town7_004105.png,True,True,False,True
 town7_004110.png,True,True,True,True
 town7_004114.png,True,True,True,True
 town7_004116.png,True,True,True,True
 town7_004121.png,True,True,True,True
 town7_004123.png,True,True,True,True
+town7_004124.png,True,True,False,True
 town7_004126.png,True,False,False,True
 town7_004128.png,True,False,False,False
 town7_004141.png,True,False,False,False
@@ -794,7 +817,9 @@ town7_004156.png,True,False,False,True
 town7_004158.png,True,False,False,True
 town7_004159.png,True,False,False,True
 town7_004160.png,True,False,False,True
+town7_004168.png,True,False,False,True
 town7_004169.png,True,False,False,False
+town7_004173.png,True,False,True,True
 town7_004176.png,True,False,True,True
 town7_004177.png,True,False,True,True
 town7_004183.png,True,False,True,True
@@ -864,6 +889,7 @@ town7_004499.png,False,False,False,True
 town7_004503.png,False,False,False,True
 town7_004509.png,False,False,False,True
 town7_004510.png,False,False,False,True
+town7_004517.png,True,True,True,True
 town7_004521.png,False,False,False,False
 town7_004522.png,True,False,False,True
 town7_004524.png,False,False,False,True
@@ -975,6 +1001,7 @@ town7_005122.png,False,False,False,True
 town7_005124.png,False,False,False,True
 town7_005126.png,True,False,False,True
 town7_005131.png,True,False,False,True
+town7_005135.png,True,True,False,True
 town7_005152.png,True,False,False,True
 town7_005159.png,False,False,False,True
 town7_005163.png,True,False,False,True
@@ -985,6 +1012,9 @@ town7_005172.png,True,False,False,True
 town7_005180.png,False,False,False,True
 town7_005181.png,False,False,False,True
 town7_005183.png,True,False,False,True
+town7_005206.png,True,True,True,True
+town7_005207.png,True,True,True,True
+town7_005212.png,True,True,True,True
 town7_005220.png,True,False,True,True
 town7_005222.png,True,True,True,True
 town7_005224.png,True,True,True,True
@@ -1028,6 +1058,7 @@ town7_005399.png,True,False,False,True
 town7_005411.png,False,False,False,True
 town7_005415.png,False,False,False,True
 town7_005428.png,True,False,False,True
+town7_005429.png,True,True,False,True
 town7_005435.png,False,False,False,True
 town7_005437.png,False,False,False,True
 town7_005449.png,False,False,False,True
@@ -1215,6 +1246,7 @@ town7_006333.png,False,False,False,False
 town7_006338.png,False,False,False,True
 town7_006340.png,False,False,False,True
 town7_006346.png,False,False,False,True
+town7_006363.png,True,True,False,True
 town7_006374.png,True,False,True,True
 town7_006375.png,True,False,True,True
 town7_006387.png,True,True,True,True
@@ -1248,6 +1280,7 @@ town7_006514.png,True,False,False,True
 town7_006516.png,True,False,False,True
 town7_006518.png,True,False,False,True
 town7_006521.png,True,True,False,True
+town7_006526.png,True,True,False,True
 town7_006527.png,True,False,True,True
 town7_006533.png,True,False,False,True
 town7_006537.png,False,False,False,True
@@ -1286,6 +1319,7 @@ town7_006691.png,True,True,False,True
 town7_006706.png,False,False,False,True
 town7_006711.png,False,False,False,True
 town7_006724.png,False,False,False,False
+town7_006726.png,True,False,False,False
 town7_006728.png,True,False,True,True
 town7_006733.png,True,False,True,True
 town7_006737.png,True,False,True,True
@@ -1315,6 +1349,7 @@ town7_006842.png,False,False,False,True
 town7_006847.png,True,False,False,True
 town7_006852.png,True,False,False,True
 town7_006854.png,True,False,False,True
+town7_006866.png,True,True,True,True
 town7_006868.png,True,False,True,True
 town7_006873.png,True,False,True,True
 town7_006875.png,True,False,True,True
@@ -1357,6 +1392,7 @@ town7_007010.png,True,True,True,True
 town7_007016.png,False,False,False,True
 town7_007021.png,False,False,False,True
 town7_007022.png,False,False,False,True
+town7_007024.png,True,True,True,True
 town7_007028.png,True,False,True,True
 town7_007036.png,True,False,True,True
 town7_007043.png,True,False,True,True
@@ -1387,6 +1423,7 @@ town7_007153.png,True,False,False,True
 town7_007154.png,True,False,False,True
 town7_007157.png,True,False,False,True
 town7_007162.png,True,True,True,True
+town7_007166.png,True,False,True,True
 town7_007169.png,True,False,True,True
 town7_007171.png,True,True,True,True
 town7_007172.png,True,True,True,True
@@ -1450,6 +1487,7 @@ town7_007467.png,False,False,False,True
 town7_007474.png,True,True,False,True
 town7_007481.png,True,False,False,True
 town7_007487.png,True,False,False,True
+town7_007488.png,True,True,False,True
 town7_007494.png,True,True,True,True
 town7_007495.png,True,False,True,True
 town7_007496.png,True,False,True,True
@@ -1681,6 +1719,7 @@ town7_008538.png,True,False,False,True
 town7_008540.png,True,False,False,True
 town7_008544.png,True,False,False,True
 town7_008551.png,True,False,False,True
+town7_008559.png,True,False,True,True
 town7_008563.png,True,False,True,True
 town7_008570.png,True,False,True,True
 town7_008576.png,True,False,True,True
@@ -1693,6 +1732,7 @@ town7_008604.png,False,False,False,True
 town7_008607.png,True,False,False,True
 town7_008611.png,False,False,False,True
 town7_008615.png,True,False,False,True
+town7_008617.png,True,True,False,True
 town7_008619.png,True,False,False,True
 town7_008622.png,True,False,False,True
 town7_008626.png,True,False,False,True
@@ -1724,6 +1764,7 @@ town7_008729.png,True,False,False,True
 town7_008737.png,True,False,False,True
 town7_008738.png,True,False,False,True
 town7_008739.png,True,False,False,True
+town7_008741.png,True,True,True,True
 town7_008753.png,False,False,False,True
 town7_008755.png,False,False,False,True
 town7_008761.png,True,False,False,True
@@ -1754,6 +1795,8 @@ town7_008922.png,False,False,False,True
 town7_008928.png,False,False,False,True
 town7_008932.png,False,False,False,True
 town7_008933.png,False,False,False,True
+town7_008940.png,True,True,False,True
+town7_008943.png,True,True,True,True
 town7_008946.png,False,False,False,True
 town7_008950.png,False,False,False,True
 town7_008952.png,True,True,False,True
@@ -1954,10 +1997,12 @@ town7_009825.png,True,False,False,False
 town7_009827.png,True,False,False,True
 town7_009832.png,True,False,False,True
 town7_009846.png,True,False,False,True
+town7_009860.png,True,True,True,True
 town7_009864.png,True,True,False,True
 town7_009869.png,True,False,True,True
 town7_009875.png,True,False,True,True
 town7_009883.png,True,False,True,True
+town7_009885.png,True,True,True,True
 town7_009886.png,True,True,False,True
 town7_009897.png,True,False,False,True
 town7_009898.png,True,False,False,True
@@ -2058,6 +2103,7 @@ town7_010406.png,True,False,True,True
 town7_010415.png,True,False,True,True
 town7_010417.png,True,False,True,True
 town7_010418.png,True,False,True,True
+town7_010423.png,True,True,False,True
 town7_010427.png,False,False,False,True
 town7_010428.png,False,False,False,True
 town7_010435.png,True,False,False,False
@@ -2178,9 +2224,14 @@ town7_011081.png,False,False,False,True
 town7_011083.png,False,False,False,True
 town7_011085.png,False,False,False,True
 town7_011087.png,False,False,False,True
+town7_011092.png,True,True,True,True
 town7_011096.png,True,True,False,True
+town7_011105.png,True,False,True,True
 town7_011106.png,True,True,True,True
+town7_011107.png,True,False,False,True
+town7_011108.png,True,True,True,True
 town7_011109.png,True,True,True,True
+town7_011112.png,True,True,True,True
 town7_011124.png,True,False,False,True
 town7_011125.png,True,False,False,True
 town7_011126.png,True,False,False,True
@@ -2192,6 +2243,7 @@ town7_011146.png,True,False,False,False
 town7_011161.png,False,False,False,True
 town7_011165.png,False,False,False,True
 town7_011173.png,True,False,False,True
+town7_011179.png,True,True,True,True
 town7_011184.png,False,False,False,True
 town7_011187.png,False,False,False,True
 town7_011201.png,False,False,False,True
@@ -2233,6 +2285,7 @@ town7_011350.png,False,False,False,False
 town7_011362.png,True,False,False,False
 town7_011379.png,True,False,True,True
 town7_011381.png,True,False,True,True
+town7_011386.png,True,True,False,True
 town7_011388.png,True,False,False,True
 town7_011400.png,False,False,False,True
 town7_011401.png,False,False,False,True
@@ -2243,6 +2296,7 @@ town7_011433.png,True,False,False,True
 town7_011436.png,True,False,False,True
 town7_011440.png,True,False,False,True
 town7_011441.png,True,True,False,True
+town7_011446.png,True,True,False,True
 town7_011447.png,True,True,True,True
 town7_011450.png,True,False,True,True
 town7_011457.png,True,False,True,True
@@ -2351,12 +2405,14 @@ town7_012032.png,True,False,False,True
 town7_012034.png,True,False,False,True
 town7_012042.png,True,False,False,True
 town7_012049.png,True,False,False,True
+town7_012056.png,True,True,True,True
 town7_012060.png,True,False,True,True
 town7_012061.png,True,True,True,True
 town7_012062.png,True,True,False,True
 town7_012068.png,True,False,True,True
 town7_012069.png,True,False,True,True
 town7_012082.png,True,False,True,True
+town7_012087.png,True,False,True,True
 town7_012089.png,True,False,True,True
 town7_012090.png,True,True,False,True
 town7_012091.png,True,True,False,True

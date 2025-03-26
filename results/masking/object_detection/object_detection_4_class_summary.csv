@@ -1,2 +1,2 @@
 Method,Total,Total STOP,STOP CE Found,STOP CE Found (%),STOP CE Not Found,STOP CE Not Found (%),Total GO,GO CE Found,GO CE Found (%),GO CE Not Found,GO CE Not Found (%),Total LEFT,LEFT CE Found,LEFT CE Found (%),LEFT CE Not Found,LEFT CE Not Found (%),Total RIGHT,RIGHT CE Found,RIGHT CE Found (%),RIGHT CE Not Found,RIGHT CE Not Found (%),Total CE Found,Total CE Found (%),Total CE Not Found,Total CE Not Found (%),Total Time Taken (s),Total Time Taken (min)
-object_detection,2312,888,35,3.94%,853,96.06%,988,45,4.55%,943,95.45%,230,3,1.30%,227,98.70%,206,0,0.00%,206,100.00%,83,3.59%,2229,96.41%,215.6,3.59
+object_detection,2422,905,37,4.09%,868,95.91%,1041,51,4.90%,990,95.10%,242,3,1.24%,239,98.76%,234,3,1.28%,231,98.72%,94,3.88%,2328,96.12%,228.5,3.81
