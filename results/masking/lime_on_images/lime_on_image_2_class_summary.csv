@@ -1,2 +1,2 @@
 Method,Total,Total STOP,STOP CE Found,STOP CE Found (%),STOP CE Not Found,STOP CE Not Found (%),Total GO,GO CE Found,GO CE Found (%),GO CE Not Found,GO CE Not Found (%),Total CE Found,Total CE Found (%),Total CE Not Found,Total CE Not Found (%),Total Time Taken (s),Total Time Taken (min)
-lime_on_image,2366,895,895,100.00%,0,0.00%,1471,0,0.00%,1471,100.00%,895,37.83%,1471,62.17%,4494.05,74.9
+lime_on_image,2422,928,928,100.00%,0,0.00%,1494,0,0.00%,1494,100.00%,928,38.32%,1494,61.68%,4595.53,76.59
