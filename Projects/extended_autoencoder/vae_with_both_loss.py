@@ -317,8 +317,10 @@ def plot_metrics(train_losses, val_losses, train_recon_losses, val_recon_losses,
 # MAIN TRAINING LOOP with CSV Logging
 #----------------------------------------------
 def main():
-    import math
-    import matplotlib.ticker as mtick
+    # Set random seeds for reproducibility.
+    # torch.manual_seed(42)
+    # if torch.cuda.is_available():
+    #     torch.cuda.manual_seed_all(42)
     
     train_transforms = transforms.Compose([
         transforms.RandomHorizontalFlip(),

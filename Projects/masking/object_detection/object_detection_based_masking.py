@@ -11,14 +11,14 @@ import pandas as pd
 from PIL import Image
 from torchvision import transforms
 
-# Add the parent directory (where masking_utils.py is located) to sys.path
+
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(script_dir, "..")))
 
 # Import utilities from masking_utils
 from masking_utils import (
     load_models, METHODS_RESULTS, METHODS_HEADERS,
-    calculate_image_metrics, save_images, update_results_csv
+    calculate_image_metrics, save_images_with_bounding_box, update_results_csv
 )
 
 # ------------------------------------------------------------------------------
@@ -58,21 +58,18 @@ def process_object_detection_masking(classifier_type:str = "4_class"):
     """
     logging.info(f" Starting object detection-based masking with {classifier_type} classification.")
 
-    # Load correct models based on classifier type
     encoder, decoder, classifier = load_models(classifier_type)
     logging.info(f" Models loaded for {classifier_type}.")
-    
-    # select the csv file based on the classifier type
     output_csv = METHODS_RESULTS[f"object_detection_{classifier_type}"]
     logging.info(f" Output CSV: {output_csv}")
-    
-    # Select the correct label mapping based on classifier type
     label_mapping = CLASS_LABELS_2_CLASS if classifier_type == "2_class" else CLASS_LABELS_4_CLASS
     
     IMAGE_DIRS = {
         "original": f"plots/object_detection_{classifier_type}_original",
+        "original_reconstructed": f"plots/object_detection_{classifier_type}_original_reconstructed",
         "masked": f"plots/object_detection_{classifier_type}_masked",
-        "reconstructed": f"plots/object_detection_{classifier_type}_reconstructed"
+        "reconstructed": f"plots/object_detection_{classifier_type}_reconstructed",
+        "original_with_bbox": f"plots/object_detection_{classifier_type}_original_with_bbox"
     }
     
     for dir_path in IMAGE_DIRS.values():
@@ -122,16 +119,16 @@ def process_object_detection_masking(classifier_type:str = "4_class"):
         bbox_info = ""
         metrics = {}
 
-        predicted_label_after_masking = predicted_label_before_masking  # Default to original prediction
-        confidence_after_masking = confidence_before_masking  # Default confidence values
+        predicted_label_after_masking = predicted_label_before_masking
+        confidence_after_masking = confidence_before_masking
 
         if detections.numel() == 0:
             logging.warning(f" No objects detected in {image_filename}. Skipping masking.")
         else:
             for det in detections:
                 x_min, y_min, x_max, y_max = map(int, det[:4])
-                objects_detected = results.names[int(det[5])]
-                bbox_info = f"({x_min}, {y_min}, {x_max}, {y_max})"
+                temp_objects_detected = results.names[int(det[5])]
+                temp_bbox_info = f"({x_min}, {y_min}, {x_max}, {y_max})"
 
                 # Step 3: Apply Object Detection-Based Masking
                 masked_image = input_image.clone()
@@ -159,9 +156,11 @@ def process_object_detection_masking(classifier_type:str = "4_class"):
                     metrics = calculate_image_metrics(input_image, reconstructed_masked_image)
                     
                     # Save Images Only if Counterfactual is Found
-                    save_images(
-                        image_filename, input_image, masked_image, reconstructed_masked_image, IMAGE_DIRS
+                    save_images_with_bounding_box(
+                        image_filename, input_image, masked_image, reconstructed_masked_image, IMAGE_DIRS, bbox_info=temp_bbox_info
                     )
+                    objects_detected = temp_objects_detected
+                    bbox_info = temp_bbox_info
                 break  # Stop after the first object detection mask
 
         # Step 9: Calculate Time Taken
