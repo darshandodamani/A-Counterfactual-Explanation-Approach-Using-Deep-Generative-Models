@@ -119,9 +119,9 @@ def process_grid_based_masking(classifier_type: str = "4_class"):
         confidence_before_masking = [round(float(x), 5) for x in F.softmax(original_prediction, dim=1).cpu().detach().numpy().flatten()]
 
         # Step 2: Apply Grid-Based Masking (Early Stopping Optimization)
-        counterfactual_found = False  # Track if CE is found
+        counterfactual_found = False
 
-        for grid_size in [(10, 5), (4, 2)]:  # First finer grid, then coarser grid
+        for grid_size in [(8, 16), (4, 8)]:  # First finer grid, then coarser grid
             if counterfactual_found:
                 break  # Stop checking if CE was already found
 
