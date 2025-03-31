@@ -403,7 +403,7 @@ def process_lime_on_latent_nun_masking():
     """
     Calls the LIME on Latent masking script using NUN and executes the process.
     """
-    from lime_on_latent_features.lime_on_latent_feature_masking_using_NUN import process_lime_on_latent_masking_nun
+    from Projects.masking.lime_on_latent_features_nun.lime_on_latent_feature_masking_using_NUN import process_lime_on_latent_masking_nun
     classifer_types = ["2_class", "4_class"]
     
     processes = []

@@ -1,4 +1,4 @@
-# location: Projects/masking/lime_on_latent_features/lime_on_latent_feature_masking_using_NUN.py
+# location: Projects/masking/lime_on_latent_features_nun/lime_on_latent_feature_masking_using_NUN.py
 import os
 import sys
 import time
@@ -26,6 +26,10 @@ from masking_utils import (
     load_models, METHODS_RESULTS, METHODS_HEADERS,
     calculate_image_metrics, update_results_csv
 )
+
+nun_df = pd.read_csv("latent_vectors/nun_values.csv")
+nun_df.set_index("Image File", inplace=True)
+
 
 # Logging setup
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -185,7 +189,17 @@ def process_lime_on_latent_masking_nun(classifier_type: str = "4_class"):
         confidence_before_masking = str([round(float(x), 5) for x in F.softmax(original_prediction, dim=1).cpu().detach().numpy().flatten()]).replace("'", "")
         logging.info(f"Image: {image_filename} | Prediction Before Masking: {predicted_label_before_masking}")
 
-        nun_latent_vector, nun_filename, nun_image = find_nearest_unlike_neighbor(latent_vector, predicted_label_before_masking_idx, encoder, classifier, TEST_DIR, classifier_type)
+        # nun_latent_vector, nun_filename, nun_image = find_nearest_unlike_neighbor(latent_vector, predicted_label_before_masking_idx, encoder, classifier, TEST_DIR, classifier_type)
+        if image_filename not in nun_df.index:
+            logging.warning(f"NUN not found for {image_filename}. Skipping.")
+            continue
+
+        nun_row = nun_df.loc[image_filename]
+        nun_latent_vector = nun_row[[col for col in nun_row.index if col.startswith("latent_")]].values.astype(np.float32)
+        nun_filename = nun_row["NUN Image"]
+        nun_image_path = os.path.join(TEST_DIR, nun_filename)
+        nun_image = Image.open(nun_image_path).convert("RGB")
+
 
         explainer = LimeTabularExplainer(
             nun_latent_vector.reshape(1, -1),
