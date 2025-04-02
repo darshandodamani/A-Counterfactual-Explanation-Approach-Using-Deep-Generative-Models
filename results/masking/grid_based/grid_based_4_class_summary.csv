@@ -1,2 +1,2 @@
 Method,Total,Total STOP,STOP CE Found,STOP CE Found (%),STOP CE Not Found,STOP CE Not Found (%),Total GO,GO CE Found,GO CE Found (%),GO CE Not Found,GO CE Not Found (%),Total LEFT,LEFT CE Found,LEFT CE Found (%),LEFT CE Not Found,LEFT CE Not Found (%),Total RIGHT,RIGHT CE Found,RIGHT CE Found (%),RIGHT CE Not Found,RIGHT CE Not Found (%),Total CE Found,Total CE Found (%),Total CE Not Found,Total CE Not Found (%),Total Time Taken (s),Total Time Taken (min)
-grid_based,2422,911,911,100.00%,0,0.00%,1031,1031,100.00%,0,0.00%,246,237,96.34%,9,3.66%,234,233,99.57%,1,0.43%,2412,99.59%,10,0.41%,1184.11,19.74
+grid_based,2422,904,904,100.00%,0,0.00%,1041,1041,100.00%,0,0.00%,246,219,89.02%,27,10.98%,231,231,100.00%,0,0.00%,2395,98.89%,27,1.11%,779.03,12.98

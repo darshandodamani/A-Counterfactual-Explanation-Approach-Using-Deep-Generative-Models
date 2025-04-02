@@ -1,5 +1,5 @@
 Method,Total,Total STOP,STOP CE Found,STOP CE Found (%),STOP CE Not Found,STOP CE Not Found (%),Total GO,GO CE Found,GO CE Found (%),GO CE Not Found,GO CE Not Found (%),Total LEFT,LEFT CE Found,LEFT CE Found (%),LEFT CE Not Found,LEFT CE Not Found (%),Total RIGHT,RIGHT CE Found,RIGHT CE Found (%),RIGHT CE Not Found,RIGHT CE Not Found (%),Total CE Found,Total CE Found (%),Total CE Not Found,Total CE Not Found (%),Total Time Taken (s),Total Time Taken (min)
-grid_based,2422,911,911,100.00%,0,0.00%,1031,1031,100.00%,0,0.00%,246,237,96.34%,9,3.66%,234,233,99.57%,1,0.43%,2412,99.59%,10,0.41%,1184.11,19.74
+grid_based,2422,904,904,100.00%,0,0.00%,1041,1041,100.00%,0,0.00%,246,219,89.02%,27,10.98%,231,231,100.00%,0,0.00%,2395,98.89%,27,1.11%,779.03,12.98
 object_detection,2422,905,37,4.09%,868,95.91%,1041,51,4.90%,990,95.10%,242,3,1.24%,239,98.76%,234,3,1.28%,231,98.72%,94,3.88%,2328,96.12%,228.5,3.81
 lime_on_image,2422,913,913,100.00%,0,0.00%,1031,1031,100.00%,0,0.00%,243,4,1.65%,239,98.35%,235,175,74.47%,60,25.53%,2123,87.65%,299,12.35%,4719.12,78.65
 lime_on_latent,2422,911,94,10.32%,817,89.68%,1031,97,9.41%,934,90.59%,250,46,18.40%,204,81.60%,230,60,26.09%,170,73.91%,297,12.26%,2125,87.74%,5557.9,92.63
