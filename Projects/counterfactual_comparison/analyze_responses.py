@@ -2,12 +2,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 # ============================
 # Step 0: Load and Clean Data
 # ============================
 file_path = "Projects/counterfactual_comparison/responses.csv"
-df = pd.read_csv(file_path)
+
+try:
+    # Use on_bad_lines='skip' to skip problematic rows
+    df = pd.read_csv(file_path, on_bad_lines='skip')
+    logging.info(f"CSV file loaded successfully with {len(df)} rows.")
+except pd.errors.ParserError as e:
+    logging.error(f"Error reading CSV file: {e}")
+    raise
 
 # Strip extra whitespace from column names
 df.columns = df.columns.str.strip()
@@ -123,12 +133,19 @@ for metric in metrics:
 # Plot a separate bar chart for each metric
 for metric in metrics:
     plt.figure(figsize=(8, 5))
-    plt.bar([f"Method {m}" for m in methods], avg_ratings[metric], color="skyblue", edgecolor="black")
-    plt.xlabel("Counterfactual Method")
-    plt.ylabel(f"Average {metric}")
-    plt.title(f"Average {metric} Ratings per Counterfactual Method")
-    plt.ylim(0, 5)  # Ratings range from 1 to 5
-    metric_plot_path = os.path.join(output_dir, f"{metric}_ratings.png")
-    plt.savefig(metric_plot_path)
-    plt.show()
-    print(f"Bar chart for {metric} saved: {metric_plot_path}")
+    # Filter out None values and corresponding methods
+    valid_ratings = [(f"Method {m}", avg_ratings[metric][i]) for i, m in enumerate(methods) if avg_ratings[metric][i] is not None]
+    methods_filtered, ratings_filtered = zip(*valid_ratings) if valid_ratings else ([], [])
+    
+    if ratings_filtered:  # Only plot if there are valid ratings
+        plt.bar(methods_filtered, ratings_filtered, color="skyblue", edgecolor="black")
+        plt.xlabel("Counterfactual Method")
+        plt.ylabel(f"Average {metric}")
+        plt.title(f"Average {metric} Ratings per Counterfactual Method")
+        plt.ylim(0, 5)  # Ratings range from 1 to 5
+        metric_plot_path = os.path.join(output_dir, f"{metric}_ratings.png")
+        plt.savefig(metric_plot_path)
+        plt.show()
+        print(f"Bar chart for {metric} saved: {metric_plot_path}")
+    else:
+        logging.warning(f"No valid ratings available for {metric}. Skipping plot.")
