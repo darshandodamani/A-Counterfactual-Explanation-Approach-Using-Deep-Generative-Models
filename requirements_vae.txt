@@ -15,13 +15,13 @@ tensorboard==2.19.0
 sewar==0.4.6
 torchviz==0.0.3
 scipy==1.15.2
-six ==1.17.0
-IPyhton==9.0.1
+six==1.17.0
+IPython==9.0.1
 tensorflow==2.19.0
 
 # For fastapi
-fastapi == 0.115.8
-uvicorn == 0.34.0
+fastapi==0.115.8
+uvicorn==0.34.0
 python-multipart==0.0.20
 
 # For venn diagram
