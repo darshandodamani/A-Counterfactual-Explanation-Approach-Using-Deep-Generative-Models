@@ -12,6 +12,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import torch.nn.functional as F
+import random
 
 # Import your updated encoder and decoder modules.
 from encoder import VariationalEncoder
@@ -316,6 +317,21 @@ def plot_metrics(train_losses, val_losses, train_recon_losses, val_recon_losses,
 #----------------------------------------------
 # MAIN TRAINING LOOP with CSV Logging
 #----------------------------------------------
+class RandomMasking:
+    def __init__(self, mask_ratio=0.2):
+        self.mask_ratio = mask_ratio
+
+    def __call__(self, img):
+        """Randomly masks a portion of the image."""
+        img = transforms.ToTensor()(img)
+        _, h, w = img.shape
+        mask_h = int(h * self.mask_ratio)
+        mask_w = int(w * self.mask_ratio)
+        top = random.randint(0, h - mask_h)
+        left = random.randint(0, w - mask_w)
+        img[:, top:top + mask_h, left:left + mask_w] = 0  # Set masked region to 0
+        return transforms.ToPILImage()(img)
+
 def main():
     # Set random seeds for reproducibility.
     # torch.manual_seed(42)
@@ -325,11 +341,16 @@ def main():
     train_transforms = transforms.Compose([
         transforms.RandomHorizontalFlip(),
         transforms.Resize((80, 160)),
-        transforms.ToTensor(),
+        # RandomMasking(mask_ratio=0.2),  # Add random masking
+        transforms.ToTensor()
+        # transforms.Normalize(mean=[0.5184471607208252, 0.5032904148101807, 0.4527755081653595], 
+        #                      std=[0.19740870594978333, 0.17663948237895966, 0.18838749825954437]),  # Train dataset normalization
     ])
     test_transforms = transforms.Compose([
         transforms.Resize((80, 160)),
-        transforms.ToTensor(),
+        transforms.ToTensor()
+        # transforms.Normalize(mean=[0.5132294297218323, 0.499205082654953, 0.4481259882450104], 
+        #                      std=[0.1997665911912918, 0.1784999668598175, 0.19082865118980408]),  # Test dataset normalization
     ])
     
     data_dir = "dataset/town7_dataset/"
