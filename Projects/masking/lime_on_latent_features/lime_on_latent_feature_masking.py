@@ -84,39 +84,34 @@ def generate_lime_feature_importance_plot(image_filename, classifier_type, lime_
             logging.warning(f"Class index {class_idx} not found in LIME explanation map. Skipping.")
             continue
 
-        class_label = label_mapping.get(class_idx, f"Unknown_{class_idx}")  # Avoid KeyError
+        class_label = label_mapping.get(class_idx, f"Unknown_{class_idx}")
         class_explanation = lime_explanation_map[class_idx]
 
         # Convert LIME weights to NumPy for easy processing
         feature_indices = np.array([idx for idx, _ in class_explanation])
         lime_weights = np.array([weight for _, weight in class_explanation], dtype=float)
 
-        # Identify Positive (Red) and Negative (Green) features
-        positive_features = [(idx, weight) for idx, weight in zip(feature_indices, lime_weights) if weight > 0]
-        negative_features = [(idx, weight) for idx, weight in zip(feature_indices, lime_weights) if weight < 0]
+        # Combine and sort by absolute weight descending
+        sorted_features = sorted(zip(feature_indices, lime_weights), key=lambda x: abs(x[1]), reverse=True)
+        feature_indices, lime_weights = zip(*sorted_features)
 
-        # Sort by absolute importance
-        positive_features = sorted(positive_features, key=lambda x: abs(x[1]), reverse=True)
-        negative_features = sorted(negative_features, key=lambda x: abs(x[1]), reverse=True)
+        # Color mapping
+        colors = ['red' if w > 0 else 'green' for w in lime_weights]
 
-        feature_indices = [idx for idx, _ in positive_features + negative_features]
-        feature_weights = [weight for _, weight in positive_features + negative_features]
-
-        # LIME Feature Importance Plot
+        # Plot
         fig, ax = plt.subplots(figsize=(18, 6))
-        colors = ['red' if w > 0 else 'green' for w in feature_weights]
-        sns.barplot(x=feature_indices, y=feature_weights, ax=ax, hue=feature_indices, palette=colors, legend=False)
+        sns.barplot(x=list(feature_indices), y=list(lime_weights), ax=ax, palette=colors)
         ax.set_title(f"LIME Feature Importance for Class '{class_label}' - {image_filename}")
-        ax.set_xlabel("Latent Feature Index")
+        ax.set_xlabel("Latent Feature Index (Sorted by Importance)")
         ax.set_ylabel("Feature Weight")
         ax.tick_params(axis='x', rotation=90)
 
         # Save Plot with High DPI
         plt.tight_layout()
-        plot_filename = os.path.join(PLOT_DIR, f"{image_filename}_lime_feature_importance_class_{class_label}.png")
+        plot_filename = os.path.join(PLOT_DIR, f"{image_filename}_lime_feature_importance_class_{class_label}_sorted.png")
         plt.savefig(plot_filename, dpi=300)
         plt.close()
-        logging.info(f" Saved LIME feature importance plot for class '{class_label}' for {image_filename} at {plot_filename}")
+        logging.info(f" Saved sorted LIME feature importance plot for class '{class_label}' for {image_filename} at {plot_filename}")
 
         
 # ------------------------------------------------------------------------------
