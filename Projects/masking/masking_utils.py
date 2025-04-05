@@ -12,11 +12,12 @@ from skimage.metrics import structural_similarity as ssim, mean_squared_error as
 from sewar.full_ref import vifp, uqi
 import sys
 from typing import Any, Dict
+from PIL import ImageDraw
 
 # spawn is used for multiprocessing to avoid CUDA reinitialization errors
 multiprocessing.set_start_method("spawn", force=True)
 
-# Add the path to the "autoencoder" directory
+# Autoencoder directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.abspath(os.path.join(script_dir, "..", "autoencoder")))
 
@@ -37,6 +38,8 @@ METHODS_RESULTS: Dict[str, str] = {
     "object_detection_4_class": "results/masking/object_detection/object_detection_masking_4_classes_results.csv", 
     "lime_on_latent_feature_2_class": "results/masking/lime_on_latent/lime_on_latent_masking_2_classes_results.csv",
     "lime_on_latent_feature_4_class": "results/masking/lime_on_latent/lime_on_latent_masking_4_classes_results.csv",
+     "lime_on_latent_feature_2_class_NUN": "results/masking/lime_on_latent/2_class_NUN_results.csv",
+    "lime_on_latent_feature_4_class_NUN": "results/masking/lime_on_latent/4_class_NUN_results.csv",
     "shap_on_latent_feature_2_class": "results/masking/lime_on_latent/shap_on_latent_masking_2_classes_results.csv",
     "shap_on_latent_feature_4_class": "results/masking/lime_on_latent/shap_on_latent_masking_4_classes_results.csv"
 }
@@ -45,6 +48,18 @@ METHODS_RESULTS: Dict[str, str] = {
 # Column headers for each method
 # ----------------------------------------------------------------------------
 METHODS_HEADERS: Dict[str, list] = {
+    "lime_on_latent_feature_2_class_NUN": [
+        "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
+        "Prediction (After Masking)", "Confidence (After Masking)", 
+        "Counterfactual Found", "Features Replaced", "Feature Selection (%)",
+        "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+    ],
+    "lime_on_latent_feature_4_class_NUN": [
+        "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
+        "Prediction (After Masking)", "Confidence (After Masking)", 
+        "Counterfactual Found", "Features Replaced", "Feature Selection (%)",
+        "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+    ],
     "grid_based_2_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
@@ -192,6 +207,45 @@ def save_images(image_filename: str, input_image: torch.Tensor, masked_image: to
     
     logging.info(f"Saved images for {image_filename}")
     
+from PIL import ImageDraw
+
+def save_images_with_bounding_box(image_filename: str, input_image: torch.Tensor, masked_image: torch.Tensor, 
+                                  reconstructed_image: torch.Tensor, output_dirs: Dict[str, str], bbox_info: str = None) -> None:
+    """
+    Saves images (original, masked, reconstructed, and original reconstructed) to the specified directories.
+    Also draws a bounding box on the original image if bbox_info is provided.
+    """
+    # Create directories
+    os.makedirs(output_dirs["original"], exist_ok=True)
+    os.makedirs(output_dirs["masked"], exist_ok=True)
+    os.makedirs(output_dirs["reconstructed"], exist_ok=True)
+    os.makedirs(output_dirs.get("original_with_bbox", f"{output_dirs['original']}_with_bbox"), exist_ok=True)
+    
+    original_pil = to_pil_image(input_image.squeeze(0).cpu())
+    masked_pil = to_pil_image(masked_image.squeeze(0).cpu())
+    reconstructed_pil = to_pil_image(reconstructed_image.squeeze(0).cpu())
+    
+    base_filename, _ = os.path.splitext(image_filename)
+    
+    # Save original, masked, and reconstructed images
+    original_pil.save(os.path.join(output_dirs["original"], f"{base_filename}.png"))
+    masked_pil.save(os.path.join(output_dirs["masked"], f"{base_filename}.png"))
+    reconstructed_pil.save(os.path.join(output_dirs["reconstructed"], f"{base_filename}.png"))
+    
+    # Save the original reconstructed image (without masking)
+    original_reconstructed_pil = to_pil_image(reconstructed_image.squeeze(0).cpu())
+    os.makedirs(output_dirs.get("original_reconstructed", f"{output_dirs['original']}_reconstructed"), exist_ok=True)
+    original_reconstructed_pil.save(os.path.join(output_dirs.get("original_reconstructed", f"{output_dirs['original']}_reconstructed"), f"{base_filename}_original_reconstructed.png"))
+    
+    # Draw bounding box on original image if bbox_info is provided
+    if bbox_info:
+        draw = ImageDraw.Draw(original_pil)
+        x_min, y_min, x_max, y_max = map(int, eval(bbox_info))
+        draw.rectangle([x_min, y_min, x_max, y_max], outline="red", width=2)
+        original_pil.save(os.path.join(output_dirs.get("original_with_bbox", f"{output_dirs['original']}_with_bbox"), f"{base_filename}_with_bbox.png"))
+    
+    logging.info(f"Saved images for {image_filename}")
+    
 def save_images_without_mask(image_filename: str, input_image: torch.Tensor, reconstructed_image: torch.Tensor, output_dirs: Dict[str, str]) -> None:
     """
     Saves only the original and reconstructed images (without masked image).
@@ -220,28 +274,32 @@ def update_results_csv(method: str, image_filename: str, results: Dict[str, Any]
 
     df_results = pd.read_csv(results_csv)
 
-    # Ensure proper type casting before updating DataFrame
+    # To ensure proper type casting before updating DataFrame
     formatted_results = {}
     for key, value in results.items():
-        if isinstance(value, bool):  
-            formatted_results[key] = bool(value)  # Explicitly cast to bool
+        if key == "Image File":
+            formatted_results[key] = image_filename
+        elif isinstance(value, bool):  
+            formatted_results[key] = bool(value)
         elif isinstance(value, (int, float, np.float64, np.int64)):  
-            formatted_results[key] = float(value)  # Explicitly cast to float
+            formatted_results[key] = float(value)
         elif isinstance(value, (list, np.ndarray)):  
-            formatted_results[key] = ", ".join(map(str, value))  # Convert list/array to a string
+            formatted_results[key] = ", ".join(map(str, value))
         elif value == "":  
-            formatted_results[key] = np.nan  # Convert empty values to NaN
+            formatted_results[key] = np.nan
         else:
-            formatted_results[key] = str(value)  # Convert all other types to string
+            formatted_results[key] = str(value)
+
+    logging.info(f"Formatted results before update: {formatted_results}")
 
     # Ensure correct dtype for each column before updating
     for col in df_results.columns:
         if col in formatted_results:
             if df_results[col].dtype == "bool":
-                formatted_results[col] = bool(formatted_results[col])  # Ensure bool dtype
+                formatted_results[col] = bool(formatted_results[col])
             elif df_results[col].dtype == "float64":
                 try:
-                    formatted_results[col] = float(formatted_results[col])  # Ensure float dtype
+                    formatted_results[col] = float(formatted_results[col])
                 except ValueError:
                     logging.warning(f"ValueError: Could not convert {formatted_results[col]} to float. Setting as NaN.")
                     formatted_results[col] = np.nan
@@ -261,8 +319,7 @@ def update_results_csv(method: str, image_filename: str, results: Dict[str, Any]
         if col in df_results.columns:
             df_results[col] = pd.to_numeric(df_results[col], errors="coerce") 
 
-    # Debugging: Print DataFrame Before Saving
-    logging.info(f" Data to be written:\n{df_results.head()}")
+    logging.info(f" Data to be written:\n{df_results.tail()}")
 
     # Ensure CSV is written properly
     df_results.to_csv(results_csv, index=False)
@@ -342,23 +399,23 @@ def process_lime_on_latent_masking():
         p.join()
         logging.info("Completed LIME on Latent masking.")
         
-def process_shap_on_latent_masking():
+def process_lime_on_latent_nun_masking():
     """
-    Calls the LIME on Latent masking script and executes the process.
+    Calls the LIME on Latent masking script using NUN and executes the process.
     """
-    from lime_on_latent_features.shap_on_latent_feature_masking import process_shap_on_latent_masking
+    from Projects.masking.lime_on_latent_features_nun.lime_on_latent_feature_masking_using_NUN import process_lime_on_latent_masking_nun
     classifer_types = ["2_class", "4_class"]
     
     processes = []
     for classifier_type in classifer_types:
-        logging.info(f"Starting LIME on Latent masking for {classifier_type} in parallel.")
-        p = multiprocessing.Process(target=process_shap_on_latent_masking, args=(classifier_type,))
+        logging.info(f"Starting LIME on Latent masking using NUN for {classifier_type} in parallel.")
+        p = multiprocessing.Process(target=process_lime_on_latent_masking_nun, args=(classifier_type,))
         processes.append(p)
         p.start()
         
     for p in processes:
         p.join()
-        logging.info("Completed LIME on Latent masking.")
+        logging.info(f"Completed LIME on Latent masking using NUN for {classifier_type}.")
         
 def run_parallel_masking():
     """
@@ -369,7 +426,7 @@ def run_parallel_masking():
         "object_detection": process_object_detection_based_masking,
         "lime_on_image": process_lime_on_image_masking,
         "lime_on_latent": process_lime_on_latent_masking,
-        # "shap_on_latent": process_shap_on_latent_masking
+        "lime_on_latent_nun": process_lime_on_latent_nun_masking,
     }
     
     processes = []

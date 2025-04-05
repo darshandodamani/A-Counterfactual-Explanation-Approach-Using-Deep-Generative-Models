@@ -35,3 +35,6 @@ Projects/masking/object-detection/model/
 
 # Ignore the model/ directory
 model/
+
+# YOLOv5 downloaded from torch.hub 
+*.pt

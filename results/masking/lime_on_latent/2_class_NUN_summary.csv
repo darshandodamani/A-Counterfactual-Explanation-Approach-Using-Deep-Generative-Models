@@ -1,0 +1,2 @@
+Method,Total,Total STOP,STOP CE Found,STOP CE Found (%),STOP CE Not Found,STOP CE Not Found (%),Total GO,GO CE Found,GO CE Found (%),GO CE Not Found,GO CE Not Found (%),Total CE Found,Total CE Found (%),Total CE Not Found,Total CE Not Found (%),Total Time Taken (s),Total Time Taken (min)
+lime_on_latent_nun,2422,922,912,98.92%,10,1.08%,1500,1386,92.40%,114,7.60%,2298,94.88%,124,5.12%,15607.52,260.13

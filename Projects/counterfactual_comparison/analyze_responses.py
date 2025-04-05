@@ -2,12 +2,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 # ============================
 # Step 0: Load and Clean Data
 # ============================
 file_path = "Projects/counterfactual_comparison/responses.csv"
-df = pd.read_csv(file_path)
+
+try:
+    # Use on_bad_lines='skip' to skip problematic rows
+    df = pd.read_csv(file_path, on_bad_lines='skip')
+    logging.info(f"CSV file loaded successfully with {len(df)} rows.")
+except pd.errors.ParserError as e:
+    logging.error(f"Error reading CSV file: {e}")
+    raise
 
 # Strip extra whitespace from column names
 df.columns = df.columns.str.strip()
@@ -19,8 +29,8 @@ print("Detected columns:", df.columns.tolist())
 # ============================
 # Step 1: Rename Columns (Optional)
 # ============================
-# Use this mapping if you want to show alternative method names for visualization.
-# If your CSV already contains the desired column names, you can skip this step.
+# If desired, use this mapping to display alternative method names.
+# Update mapping to include method4.
 method_mapping = {
     "Counterfactual_1_Interpretability": "Grid-Based Masking_Interpretability",
     "Counterfactual_1_Plausibility": "Grid-Based Masking_Plausibility",
@@ -33,6 +43,10 @@ method_mapping = {
     "Counterfactual_3_Interpretability": "LIME on Latent Features_Interpretability",
     "Counterfactual_3_Plausibility": "LIME on Latent Features_Plausibility",
     "Counterfactual_3_VisualCoherence": "LIME on Latent Features_VisualCoherence",
+    
+    "Counterfactual_4_Interpretability": "LIME on Latent Feature Masking using NUN_Interpretability",
+    "Counterfactual_4_Plausibility": "LIME on Latent Feature Masking using NUN_Plausibility",
+    "Counterfactual_4_VisualCoherence": "LIME on Latent Feature Masking using NUN_VisualCoherence",
 }
 
 # Uncomment the following line if you want to apply renaming:
@@ -67,7 +81,7 @@ output_dir = "plots/counterfactual_comparison/"
 os.makedirs(output_dir, exist_ok=True)
 
 # ============================
-# Step 6: Bar Plot Using Pivoted Data
+# Step 6: Combined Bar Plot Using Pivoted Data
 # ============================
 plt.figure(figsize=(10, 6))
 df_pivot.plot(kind="bar", colormap="viridis", edgecolor="black")
@@ -80,6 +94,7 @@ plt.grid(axis="y", linestyle="--", alpha=0.6)
 plt.tight_layout()
 bar_plot_path = os.path.join(output_dir, "bar_plot_user_evaluations.png")
 plt.savefig(bar_plot_path)
+plt.show()
 print(f"Bar plot saved: {bar_plot_path}")
 
 # ============================
@@ -92,13 +107,15 @@ plt.xlabel("Method")
 plt.ylabel("Evaluation Criterion")
 heatmap_path = os.path.join(output_dir, "heatmap_user_evaluations.png")
 plt.savefig(heatmap_path)
+plt.show()
 print(f"Heatmap saved: {heatmap_path}")
 
 # ============================
 # Step 8: Compute Average Ratings from Wide-Format Data and Plot Individual Bar Charts
 # ============================
 metrics = ["Interpretability", "Plausibility", "VisualCoherence"]
-methods = [1, 2, 3]
+# Update the methods list to include method 4
+methods = [1, 2, 3, 4]
 avg_ratings = {}
 
 for metric in metrics:
@@ -116,11 +133,19 @@ for metric in metrics:
 # Plot a separate bar chart for each metric
 for metric in metrics:
     plt.figure(figsize=(8, 5))
-    plt.bar([f"Method {m}" for m in methods], avg_ratings[metric], color="skyblue", edgecolor="black")
-    plt.xlabel("Counterfactual Method")
-    plt.ylabel(f"Average {metric}")
-    plt.title(f"Average {metric} Ratings per Counterfactual Method")
-    plt.ylim(0, 5)
-    metric_plot_path = os.path.join(output_dir, f"{metric}_ratings.png")
-    plt.savefig(metric_plot_path)
-    print(f"Bar chart for {metric} saved: {metric_plot_path}")
+    # Filter out None values and corresponding methods
+    valid_ratings = [(f"Method {m}", avg_ratings[metric][i]) for i, m in enumerate(methods) if avg_ratings[metric][i] is not None]
+    methods_filtered, ratings_filtered = zip(*valid_ratings) if valid_ratings else ([], [])
+    
+    if ratings_filtered:  # Only plot if there are valid ratings
+        plt.bar(methods_filtered, ratings_filtered, color="skyblue", edgecolor="black")
+        plt.xlabel("Counterfactual Method")
+        plt.ylabel(f"Average {metric}")
+        plt.title(f"Average {metric} Ratings per Counterfactual Method")
+        plt.ylim(0, 5)  # Ratings range from 1 to 5
+        metric_plot_path = os.path.join(output_dir, f"{metric}_ratings.png")
+        plt.savefig(metric_plot_path)
+        plt.show()
+        print(f"Bar chart for {metric} saved: {metric_plot_path}")
+    else:
+        logging.warning(f"No valid ratings available for {metric}. Skipping plot.")

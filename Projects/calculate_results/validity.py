@@ -17,7 +17,8 @@ for class_type in class_types:
         "Grid-Based Masking": f"results/masking/grid_based/grid_based_masking_{class_suffix}_results.csv",
         "Object Detection": f"results/masking/object_detection/object_detection_masking_{class_suffix}_results.csv",
         "LIME on Images": f"results/masking/lime_on_images/lime_on_image_masking_{class_suffix}_results.csv",
-        "LIME on Latent Features": f"results/masking/lime_on_latent/lime_on_latent_masking_{class_suffix}_results.csv"
+        "LIME on Latent Features": f"results/masking/lime_on_latent/lime_on_latent_masking_{class_suffix}_results.csv",
+        "LIME on Latent NUN": f"results/masking/lime_on_latent/{class_suffix}_NUN_results.csv"
     }
     
     # ------------------------------------------------------------------------------

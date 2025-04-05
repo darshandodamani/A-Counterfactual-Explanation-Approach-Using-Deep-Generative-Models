@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Define the CSV file for logging responses (for evaluations)
 responses_file = os.path.join(BASE_DIR, "responses.csv")
 
-# Ensure the responses CSV file exists with headers (anonymous columns)
+# Ensure the responses CSV file exists with headers (anonymous columns for 4 methods)
 def initialize_responses_csv():
     if not os.path.exists(responses_file) or os.stat(responses_file).st_size == 0:
         with open(responses_file, "w", newline="") as file:
@@ -26,7 +26,8 @@ def initialize_responses_csv():
                 "Image",
                 "Counterfactual_1_Interpretability", "Counterfactual_1_Plausibility", "Counterfactual_1_VisualCoherence", "Counterfactual_1_Comments",
                 "Counterfactual_2_Interpretability", "Counterfactual_2_Plausibility", "Counterfactual_2_VisualCoherence", "Counterfactual_2_Comments",
-                "Counterfactual_3_Interpretability", "Counterfactual_3_Plausibility", "Counterfactual_3_VisualCoherence", "Counterfactual_3_Comments"
+                "Counterfactual_3_Interpretability", "Counterfactual_3_Plausibility", "Counterfactual_3_VisualCoherence", "Counterfactual_3_Comments",
+                "Counterfactual_4_Interpretability", "Counterfactual_4_Plausibility", "Counterfactual_4_VisualCoherence", "Counterfactual_4_Comments"
             ])
 
 initialize_responses_csv()
@@ -62,21 +63,24 @@ def get_random_image_data():
         "method1": "images/method1/" + chosen,
         "method2": "images/method2/" + chosen,
         "method3": "images/method3/" + chosen,
+        "method4": "images/method4/" + chosen,
         "labels": {}
     }
     if chosen in labels_data:
         row = labels_data[chosen]
         data["labels"]["original"] = row.get("Prediction (Before Masking)", "N/A")
-        # All methods use the same "After" prediction
+        # All methods use the same "After" prediction (or adjust if needed)
         after_label = row.get("Prediction (After Masking)", "N/A")
         data["labels"]["method1"] = after_label
         data["labels"]["method2"] = after_label
         data["labels"]["method3"] = after_label
+        data["labels"]["method4"] = after_label
     else:
         data["labels"]["original"] = "N/A"
         data["labels"]["method1"] = "N/A"
         data["labels"]["method2"] = "N/A"
         data["labels"]["method3"] = "N/A"
+        data["labels"]["method4"] = "N/A"
     return data
 
 # --- Mount Static Files and Setup Templates ---
@@ -115,7 +119,12 @@ async def evaluate_post(
     interpretability_method3: str = Form(...),
     plausibility_method3: str = Form(...),
     visual_coherence_method3: str = Form(...),
-    comments_method3: str = Form("")
+    comments_method3: str = Form(""),
+    # Ratings for counterfactual image 4 (method4)
+    interpretability_method4: str = Form(...),
+    plausibility_method4: str = Form(...),
+    visual_coherence_method4: str = Form(...),
+    comments_method4: str = Form("")
 ):
     # Save only the filename (e.g., "town7_009556.png")
     image_filename = os.path.basename(image)
@@ -138,6 +147,12 @@ async def evaluate_post(
             "plausibility": plausibility_method3,
             "visual_coherence": visual_coherence_method3,
             "comments": comments_method3,
+        },
+        "Counterfactual_4": {  # New method
+            "interpretability": interpretability_method4,
+            "plausibility": plausibility_method4,
+            "visual_coherence": visual_coherence_method4,
+            "comments": comments_method4,
         }
     }
     print("Form Data Received:", form_data)
@@ -147,7 +162,8 @@ async def evaluate_post(
             image_filename,
             interpretability_method1, plausibility_method1, visual_coherence_method1, comments_method1,
             interpretability_method2, plausibility_method2, visual_coherence_method2, comments_method2,
-            interpretability_method3, plausibility_method3, visual_coherence_method3, comments_method3
+            interpretability_method3, plausibility_method3, visual_coherence_method3, comments_method3,
+            interpretability_method4, plausibility_method4, visual_coherence_method4, comments_method4
         ])
     return RedirectResponse(url="/thank_you", status_code=302)
 

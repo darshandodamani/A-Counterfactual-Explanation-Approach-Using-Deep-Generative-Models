@@ -1,10 +1,12 @@
 Image File,Prediction (Before Masking),Prediction (After Masking)
+town7_000116.png,GO,STOP
 town7_000127.png,STOP,GO
 town7_000128.png,STOP,GO
 town7_000129.png,STOP,GO
 town7_000130.png,STOP,GO
 town7_000139.png,STOP,GO
 town7_000140.png,STOP,GO
+town7_000144.png,STOP,GO
 town7_000252.png,STOP,GO
 town7_000262.png,STOP,GO
 town7_000263.png,STOP,GO
@@ -14,6 +16,7 @@ town7_000692.png,STOP,GO
 town7_000695.png,STOP,GO
 town7_000702.png,STOP,GO
 town7_000704.png,STOP,GO
+town7_000913.png,GO,STOP
 town7_000969.png,STOP,GO
 town7_000971.png,STOP,GO
 town7_000974.png,STOP,GO
@@ -27,9 +30,12 @@ town7_001236.png,STOP,GO
 town7_001369.png,STOP,GO
 town7_001462.png,STOP,GO
 town7_001463.png,STOP,GO
+town7_001612.png,STOP,GO
 town7_001616.png,STOP,GO
 town7_001686.png,STOP,GO
+town7_001832.png,GO,STOP
 town7_002115.png,STOP,GO
+town7_002389.png,GO,STOP
 town7_002856.png,STOP,GO
 town7_002862.png,STOP,GO
 town7_002865.png,STOP,GO
@@ -38,6 +44,7 @@ town7_002872.png,STOP,GO
 town7_002874.png,STOP,GO
 town7_002878.png,STOP,GO
 town7_002882.png,STOP,GO
+town7_003094.png,STOP,GO
 town7_003656.png,STOP,GO
 town7_003658.png,STOP,GO
 town7_003660.png,STOP,GO
@@ -46,7 +53,9 @@ town7_003666.png,STOP,GO
 town7_003719.png,STOP,GO
 town7_003766.png,STOP,GO
 town7_003897.png,STOP,GO
+town7_003931.png,STOP,GO
 town7_003986.png,STOP,GO
+town7_004010.png,GO,STOP
 town7_004110.png,STOP,GO
 town7_004114.png,STOP,GO
 town7_004116.png,STOP,GO
@@ -54,6 +63,10 @@ town7_004121.png,STOP,GO
 town7_004123.png,STOP,GO
 town7_004202.png,STOP,GO
 town7_004336.png,STOP,GO
+town7_004517.png,GO,STOP
+town7_005206.png,GO,STOP
+town7_005207.png,GO,STOP
+town7_005212.png,STOP,GO
 town7_005222.png,STOP,GO
 town7_005224.png,STOP,GO
 town7_005229.png,STOP,GO
@@ -64,9 +77,11 @@ town7_006136.png,STOP,GO
 town7_006387.png,STOP,GO
 town7_006482.png,STOP,GO
 town7_006575.png,STOP,GO
+town7_006866.png,GO,STOP
 town7_006883.png,STOP,GO
 town7_007003.png,STOP,GO
 town7_007010.png,STOP,GO
+town7_007024.png,STOP,GO
 town7_007162.png,STOP,GO
 town7_007171.png,STOP,GO
 town7_007172.png,STOP,GO
@@ -77,11 +92,20 @@ town7_007505.png,STOP,GO
 town7_008583.png,STOP,GO
 town7_008641.png,STOP,GO
 town7_008648.png,STOP,GO
+town7_008741.png,STOP,GO
+town7_008943.png,GO,STOP
 town7_009576.png,STOP,GO
+town7_009860.png,STOP,GO
+town7_009885.png,STOP,GO
 town7_011076.png,STOP,GO
+town7_011092.png,STOP,GO
 town7_011106.png,STOP,GO
+town7_011108.png,STOP,GO
 town7_011109.png,STOP,GO
+town7_011112.png,GO,STOP
+town7_011179.png,STOP,GO
 town7_011313.png,STOP,GO
 town7_011447.png,STOP,GO
 town7_011593.png,STOP,GO
+town7_012056.png,GO,STOP
 town7_012061.png,STOP,GO

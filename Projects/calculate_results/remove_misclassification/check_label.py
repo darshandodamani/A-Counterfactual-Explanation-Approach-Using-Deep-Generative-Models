@@ -6,14 +6,16 @@ methods_results_4_class = {
     "grid_based": "results/masking/grid_based/grid_based_masking_4_classes_results.csv",
     "object_detection": "results/masking/object_detection/object_detection_masking_4_classes_results.csv",
     "lime_on_image": "results/masking/lime_on_images/lime_on_image_masking_4_classes_results.csv",
-    "lime_on_latent": "results/masking/lime_on_latent/lime_on_latent_masking_4_classes_results.csv"
+    "lime_on_latent": "results/masking/lime_on_latent/lime_on_latent_masking_4_classes_results.csv",
+    "lime_on_latent_nun": "results/masking/lime_on_latent/2_class_NUN_results.csv"
 }
 
 methods_results_2_class = {
     "grid_based": "results/masking/grid_based/grid_based_masking_2_classes_results.csv",
     "object_detection": "results/masking/object_detection/object_detection_masking_2_classes_results.csv",
     "lime_on_image": "results/masking/lime_on_images/lime_on_image_masking_2_classes_results.csv",
-    "lime_on_latent": "results/masking/lime_on_latent/lime_on_latent_masking_2_classes_results.csv"
+    "lime_on_latent": "results/masking/lime_on_latent/lime_on_latent_masking_2_classes_results.csv",
+    "lime_on_latent_nun": "results/masking/lime_on_latent/4_class_NUN_results.csv"
 }
 
 def find_misclassified_images(methods_results, output_file):

@@ -38,8 +38,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CLASS_LABELS_4_CLASS = {0: "STOP", 1: "GO", 2: "RIGHT", 3: "LEFT"}
 CLASS_LABELS_2_CLASS = {0: "STOP", 1: "GO"}
 
-# LATENT_STATS_PATH = "latent_vectors/combined_median_values.csv"
-LATENT_STATS_PATH = "latent_vectors/mean_values.csv"
+LATENT_STATS_PATH = "latent_vectors/combined_median_values.csv"
 PLOT_DIR_2_CLASS = "plots/lime_on_latent_feature_graphs_2_class"
 PLOT_DIR_4_CLASS = "plots/lime_on_latent_feature_graphs_4_class"
 os.makedirs(PLOT_DIR_2_CLASS, exist_ok=True)
@@ -59,7 +58,7 @@ def load_latent_statistics():
         return None  # No statistics available
 
 # median_latent_values = load_latent_statistics()
-mean_latent_vector = load_latent_statistics()
+median_latent_vector = load_latent_statistics()
 
 # ------------------------------------------------------------------------------
 # Define Prediction Function for LIME
@@ -85,39 +84,34 @@ def generate_lime_feature_importance_plot(image_filename, classifier_type, lime_
             logging.warning(f"Class index {class_idx} not found in LIME explanation map. Skipping.")
             continue
 
-        class_label = label_mapping.get(class_idx, f"Unknown_{class_idx}")  # Avoid KeyError
+        class_label = label_mapping.get(class_idx, f"Unknown_{class_idx}")
         class_explanation = lime_explanation_map[class_idx]
 
         # Convert LIME weights to NumPy for easy processing
         feature_indices = np.array([idx for idx, _ in class_explanation])
         lime_weights = np.array([weight for _, weight in class_explanation], dtype=float)
 
-        # Identify Positive (Red) and Negative (Green) features
-        positive_features = [(idx, weight) for idx, weight in zip(feature_indices, lime_weights) if weight > 0]
-        negative_features = [(idx, weight) for idx, weight in zip(feature_indices, lime_weights) if weight < 0]
+        # Combine and sort by absolute weight descending
+        sorted_features = sorted(zip(feature_indices, lime_weights), key=lambda x: abs(x[1]), reverse=True)
+        feature_indices, lime_weights = zip(*sorted_features)
 
-        # Sort by absolute importance
-        positive_features = sorted(positive_features, key=lambda x: abs(x[1]), reverse=True)
-        negative_features = sorted(negative_features, key=lambda x: abs(x[1]), reverse=True)
+        # Color mapping
+        colors = ['red' if w > 0 else 'green' for w in lime_weights]
 
-        feature_indices = [idx for idx, _ in positive_features + negative_features]
-        feature_weights = [weight for _, weight in positive_features + negative_features]
-
-        # LIME Feature Importance Plot
+        # Plot
         fig, ax = plt.subplots(figsize=(18, 6))
-        colors = ['red' if w > 0 else 'green' for w in feature_weights]
-        sns.barplot(x=feature_indices, y=feature_weights, ax=ax, hue=feature_indices, palette=colors, legend=False)
+        sns.barplot(x=list(feature_indices), y=list(lime_weights), ax=ax, palette=colors)
         ax.set_title(f"LIME Feature Importance for Class '{class_label}' - {image_filename}")
-        ax.set_xlabel("Latent Feature Index")
+        ax.set_xlabel("Latent Feature Index (Sorted by Importance)")
         ax.set_ylabel("Feature Weight")
         ax.tick_params(axis='x', rotation=90)
 
         # Save Plot with High DPI
         plt.tight_layout()
-        plot_filename = os.path.join(PLOT_DIR, f"{image_filename}_lime_feature_importance_class_{class_label}.png")
+        plot_filename = os.path.join(PLOT_DIR, f"{image_filename}_lime_feature_importance_class_{class_label}_sorted.png")
         plt.savefig(plot_filename, dpi=300)
         plt.close()
-        logging.info(f" Saved LIME feature importance plot for class '{class_label}' for {image_filename} at {plot_filename}")
+        logging.info(f" Saved sorted LIME feature importance plot for class '{class_label}' for {image_filename} at {plot_filename}")
 
         
 # ------------------------------------------------------------------------------
@@ -251,7 +245,7 @@ def process_lime_on_latent_masking(classifier_type: str = "4_class"):
         # Step 11: Apply Masking & Search for Counterfactual
         for feature_index, _ in important_features:
             masked_latent_vector = latent_vector.copy()
-            masked_latent_vector[feature_index] = mean_latent_vector[feature_index]  # Replace with median value
+            masked_latent_vector[feature_index] = median_latent_vector[feature_index]
             selected_features.append(feature_index)
 
             masked_latent_tensor = torch.tensor(masked_latent_vector, dtype=torch.float32).to(device).unsqueeze(0)
@@ -270,7 +264,7 @@ def process_lime_on_latent_masking(classifier_type: str = "4_class"):
                 
                 metrics = calculate_image_metrics(input_image, reconstructed_image)
                 generate_lime_feature_importance_plot(image_filename, classifier_type, explanation, label_mapping)
-                generate_masked_features_plot(image_filename, classifier_type, selected_features, mean_latent_vector)
+                generate_masked_features_plot(image_filename, classifier_type, selected_features, median_latent_vector)
                 
                 # Save the reconstructed image
                 reconstructed_image_path = os.path.join(IMAGE_DIRS["reconstructed"], image_filename)

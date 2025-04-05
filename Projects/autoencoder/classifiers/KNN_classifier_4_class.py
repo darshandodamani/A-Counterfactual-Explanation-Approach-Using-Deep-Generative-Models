@@ -17,8 +17,8 @@ from sklearn.preprocessing import label_binarize
 # Configuration and Hyperparameters
 # ------------------------------------------------------------------------------
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-latent_dim = 128       # Must match your VAE's latent dimension
-batch_size = 64        # Match your VAE training/testing batch size
+latent_dim = 128
+batch_size = 64
 
 # Directories for saving models and plots
 MODEL_DIR = "model/epochs_500_latent_128_town_7/classifiers/"
