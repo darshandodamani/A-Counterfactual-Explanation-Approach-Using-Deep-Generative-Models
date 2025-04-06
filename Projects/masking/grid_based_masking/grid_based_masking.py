@@ -155,7 +155,8 @@ def process_grid_based_masking(classifier_type: str = "4_class"):
                 if predicted_label_after_masking != predicted_label_before_masking:
                     counterfactual_found = True  # Mark CE as found
                     metrics = calculate_image_metrics(input_image, reconstructed_masked_image)
-
+                    sparsity = int(torch.sum(latent_vector != latent_vector_masked).item())
+                    proximity = round(float(torch.norm(latent_vector - latent_vector_masked).item()), 5)
                     # Save Images Only if Counterfactual is Found
                     save_images(image_filename, input_image, masked_image, reconstructed_masked_image, IMAGE_DIRS)
                     break  # Stop checking more positions within this grid size
@@ -175,6 +176,8 @@ def process_grid_based_masking(classifier_type: str = "4_class"):
                 "Counterfactual Found": counterfactual_found,
                 "Grid Size": f"{grid_size}" if counterfactual_found else "N/A",
                 "Grid Position": f"{pos}" if counterfactual_found else "N/A",
+                "Sparsity": sparsity if counterfactual_found else "",
+                "Proximity": proximity if counterfactual_found else "",
                 "SSIM": metrics.get("SSIM", "") if counterfactual_found else "",
                 "MSE": metrics.get("MSE", "") if counterfactual_found else "",
                 "PSNR": metrics.get("PSNR", "") if counterfactual_found else "",

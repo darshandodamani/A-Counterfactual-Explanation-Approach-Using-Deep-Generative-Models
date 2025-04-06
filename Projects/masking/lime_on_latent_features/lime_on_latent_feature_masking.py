@@ -261,6 +261,9 @@ def process_lime_on_latent_masking(classifier_type: str = "4_class"):
 
             if predicted_label_after_masking_idx != predicted_label_before_masking_idx:
                 counterfactual_found = True
+                sparsity = round(np.sum(latent_vector != masked_latent_vector), 5)
+                proximity = round(np.linalg.norm(latent_vector - masked_latent_vector), 5)
+
                 
                 metrics = calculate_image_metrics(input_image, reconstructed_image)
                 generate_lime_feature_importance_plot(image_filename, classifier_type, explanation, label_mapping)
@@ -299,6 +302,8 @@ def process_lime_on_latent_masking(classifier_type: str = "4_class"):
                 "Counterfactual Found": counterfactual_found,
                 "Feature Selection (%)": feature_selection_percentage,
                 "Selected Features": selected_features_str,
+                "Sparsity": sparsity if counterfactual_found else "",
+                "Proximity": proximity if counterfactual_found else "",
                 "SSIM": metrics.get("SSIM", "") if counterfactual_found else "",
                 "MSE": metrics.get("MSE", "") if counterfactual_found else "",
                 "PSNR": metrics.get("PSNR", "") if counterfactual_found else "",

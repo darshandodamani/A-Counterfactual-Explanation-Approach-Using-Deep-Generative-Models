@@ -8,6 +8,11 @@ from torchvision import transforms
 from PIL import Image
 import os
 import sys
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.decomposition import PCA
+from sklearn.metrics import silhouette_score
+from scipy.spatial.distance import cdist
+import json
 
 # ---------------------- Configuration ----------------------
 # Define paths
@@ -132,3 +137,83 @@ plot_latent_projection(latent_tsne, predicted_labels,
                        "tsne_latent_space_predicted_labels.png")
 
 print(f"--------- All visualizations saved in {OUTPUT_DIR} ---------")
+
+from collections import Counter
+print("True label counts:", Counter(true_labels))
+print("Predicted label counts:", Counter(predicted_labels))
+
+# ---------------------- 3D PCA Visualization ----------------------
+print("Performing 3D PCA on Latent Features...")
+pca_3d = PCA(n_components=3)
+latent_pca_3d = pca_3d.fit_transform(latent_vectors)
+
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+for class_idx, class_name in enumerate(CLASS_NAMES):
+    mask = true_labels == class_idx
+    ax.scatter(latent_pca_3d[mask, 0], latent_pca_3d[mask, 1], latent_pca_3d[mask, 2], 
+               label=class_name, color=CLASS_COLORS[class_idx], alpha=0.7, edgecolors='black', linewidth=0.5)
+
+ax.set_title("3D PCA Projection of Latent Space (True Labels)")
+ax.set_xlabel("Component 1")
+ax.set_ylabel("Component 2")
+ax.set_zlabel("Component 3")
+ax.legend()
+plt.savefig(os.path.join(OUTPUT_DIR, "3d_pca_latent_space_true_labels.png"))
+plt.close()
+
+# ---------------------- 3D t-SNE Visualization ----------------------
+print("Performing 3D t-SNE on Latent Features...")
+tsne_3d = TSNE(n_components=3, perplexity=30, random_state=42)
+latent_tsne_3d = tsne_3d.fit_transform(latent_vectors)
+
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+for class_idx, class_name in enumerate(CLASS_NAMES):
+    mask = true_labels == class_idx
+    ax.scatter(latent_tsne_3d[mask, 0], latent_tsne_3d[mask, 1], latent_tsne_3d[mask, 2], 
+               label=class_name, color=CLASS_COLORS[class_idx], alpha=0.7, edgecolors='black', linewidth=0.5)
+
+ax.set_title("3D t-SNE Projection of Latent Space (True Labels)")
+ax.set_xlabel("Dimension 1")
+ax.set_ylabel("Dimension 2")
+ax.set_zlabel("Dimension 3")
+ax.legend()
+plt.savefig(os.path.join(OUTPUT_DIR, "3d_tsne_latent_space_true_labels.png"))
+plt.close()
+
+# ---------------------- Explained Variance (PCA) ----------------------
+pca = PCA(n_components=3)
+pca.fit(latent_vectors)
+explained_variance_ratio = pca.explained_variance_ratio_
+total_variance = explained_variance_ratio.sum()
+
+# ---------------------- Silhouette Score ----------------------
+silhouette = silhouette_score(latent_vectors, true_labels)
+
+# ---------------------- Inter-class Centroid Distance ----------------------
+centroids = np.array([latent_vectors[true_labels == i].mean(axis=0) for i in range(4)])
+centroid_distances = cdist(centroids, centroids, metric='euclidean')
+centroid_df = pd.DataFrame(centroid_distances, 
+                           index=["STOP", "GO", "RIGHT", "LEFT"], 
+                           columns=["STOP", "GO", "RIGHT", "LEFT"])
+
+# Save the Centroid Distance Matrix to a CSV file for reference
+centroid_df.to_csv(os.path.join(OUTPUT_DIR, "centroid_distance_matrix.csv"))
+print("Centroid Distance Matrix saved to 'centroid_distance_matrix.csv'.")
+
+# ---------------------- Save Qualitative Metrics ----------------------
+metrics = {
+    "explained_variance_ratio": explained_variance_ratio.tolist(),
+    "total_variance_captured": total_variance,
+    "silhouette_score": silhouette
+}
+
+# Save metrics to a JSON file
+metrics_file = os.path.join(OUTPUT_DIR, "qualitative_metrics.json")
+with open(metrics_file, "w") as f:
+    json.dump(metrics, f, indent=4)
+
+print(f"Qualitative metrics saved to '{metrics_file}'.")

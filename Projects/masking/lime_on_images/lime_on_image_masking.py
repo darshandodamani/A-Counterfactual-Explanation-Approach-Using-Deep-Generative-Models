@@ -142,6 +142,9 @@ def process_lime_on_image_masking_all():
             confidence_after_masking = str([round(float(x), 5) for x in F.softmax(masked_prediction, dim=1).cpu().detach().numpy().flatten()])
 
             counterfactual_found = predicted_label_after_masking != predicted_label_before_masking
+            sparsity = round(torch.sum(latent_vector != latent_vector_masked).item(), 5)
+            proximity = round(torch.norm(latent_vector - latent_vector_masked).item(), 5)
+
             metrics = calculate_image_metrics(input_image, reconstructed_masked_image) if counterfactual_found else {}
 
             save_images(image_filename, input_image, masked_tensor, reconstructed_masked_image, IMAGE_DIRS)
@@ -157,6 +160,8 @@ def process_lime_on_image_masking_all():
                     "Prediction (After Masking)": predicted_label_after_masking,
                     "Confidence (After Masking)": confidence_after_masking,
                     "Counterfactual Found": counterfactual_found,
+                    "Sparsity": sparsity if counterfactual_found else "",
+                    "Proximity": proximity if counterfactual_found else "",
                     "SSIM": metrics.get("SSIM", ""),
                     "MSE": metrics.get("MSE", ""),
                     "PSNR": metrics.get("PSNR", ""),

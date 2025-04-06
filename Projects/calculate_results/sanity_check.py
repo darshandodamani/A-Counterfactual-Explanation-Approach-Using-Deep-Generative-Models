@@ -48,7 +48,7 @@ for class_type in class_types:
         print(f"No counterfactuals found for {class_type}. Skipping...")
         continue
 
-    # Generate boxplots without outliers
+    # Generate boxplots
     for metric in metrics_to_plot:
         plt.figure(figsize=(12, 6))
         ax = sns.boxplot(
