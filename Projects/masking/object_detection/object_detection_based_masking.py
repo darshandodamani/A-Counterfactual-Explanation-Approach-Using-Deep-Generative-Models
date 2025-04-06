@@ -154,6 +154,9 @@ def process_object_detection_masking(classifier_type:str = "4_class"):
                 if predicted_label_after_masking != predicted_label_before_masking:
                     counterfactual_found = True
                     metrics = calculate_image_metrics(input_image, reconstructed_masked_image)
+                    sparsity = round(torch.sum(latent_vector != latent_vector_masked).item(), 5)
+                    proximity = round(torch.norm(latent_vector - latent_vector_masked).item(), 5)
+
                     
                     # Save Images Only if Counterfactual is Found
                     save_images_with_bounding_box(
@@ -179,6 +182,8 @@ def process_object_detection_masking(classifier_type:str = "4_class"):
                 "Counterfactual Found": counterfactual_found,
                 "Grid Size": bbox_info,
                 "Grid Position": bbox_info,
+                "Sparsity": sparsity if counterfactual_found else "",
+                "Proximity": proximity if counterfactual_found else "",
                 "SSIM": metrics.get("SSIM", ""),
                 "MSE": metrics.get("MSE", ""),
                 "PSNR": metrics.get("PSNR", ""),

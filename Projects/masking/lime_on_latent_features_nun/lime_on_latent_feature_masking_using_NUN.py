@@ -88,17 +88,17 @@ def plot_side_by_side_images(query_image, nun_image, reconstructed_image, query_
     
     # Plot original/query image
     ax1.imshow(query_image)
-    ax1.set_title(f"Original/Query Image\n{query_filename}")
+    ax1.set_title(f"Original/Query Image\n{query_filename}", fontsize=18)
     ax1.axis('off')
     
     # Plot NUN image
     ax2.imshow(nun_image)
-    ax2.set_title(f"NUN Image\n{nun_filename}")
+    ax2.set_title(f"NUN Image\n{nun_filename}", fontsize=18)
     ax2.axis('off')
     
     # Plot reconstructed image
     ax3.imshow(reconstructed_image)
-    ax3.set_title("Reconstructed Image")
+    ax3.set_title("Reconstructed Image", fontsize=18)
     ax3.axis('off')
     
     plt.tight_layout()
@@ -123,10 +123,11 @@ def plot_lime_explanation(explanation, image_filename, classifier_type):
     plt.figure(figsize=(24, 12))
     # Use hue instead of palette, and set legend to False
     sns.barplot(x=features, y=weights, hue=features, palette=colors, legend=False)
-    plt.title(f"LIME Explanation for {image_filename}")
-    plt.xlabel("Latent Feature")
-    plt.ylabel("Feature Weight")
-    plt.xticks(rotation=90)
+    plt.title(f"LIME Explanation for {image_filename}", fontsize=24)
+    plt.xlabel("Latent Feature", fontsize=20)
+    plt.ylabel("Feature Weight", fontsize=20)
+    plt.xticks(rotation=90, fontsize=16)
+    plt.yticks(fontsize=16)
     plt.tight_layout()
     
     plot_filename = os.path.join(SAVE_DIR, f"{image_filename}_lime_explanation.png")
@@ -147,16 +148,49 @@ def plot_replaced_features(query_latent, nun_latent, replaced_features, image_fi
         plt.scatter(feature, nun_latent[feature], color='green', s=50, zorder=5)
         plt.plot([feature, feature], [query_latent[feature], nun_latent[feature]], color='black', linestyle='--', zorder=4)
     
-    plt.title(f"Replaced Features for {image_filename}")
-    plt.xlabel("Latent Feature Index")
-    plt.ylabel("Latent Feature Value")
-    plt.legend()
+    plt.title(f"Replaced Features for {image_filename}", fontsize=24)
+    plt.xlabel("Latent Feature Index", fontsize=20)
+    plt.ylabel("Latent Feature Value", fontsize=20)
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
+    plt.legend(fontsize=16)
     plt.tight_layout()
     
     plot_filename = os.path.join(SAVE_DIR, f"{image_filename}_replaced_features.png")
     plt.savefig(plot_filename, dpi=300)
     plt.close()
     logging.info(f"Saved replaced features plot at {plot_filename}")
+
+def plot_positive_lime_features(query_latent, nun_latent, explanation, image_filename, classifier_type):
+    SAVE_DIR = f"plots/lime_with_nun_{classifier_type}/positive_lime_features"
+    os.makedirs(SAVE_DIR, exist_ok=True)
+
+    # Extract positively weighted features only
+    explanation_list = explanation.as_list()
+    positive_features = [int(feat.split("_")[-1]) for feat, wt in explanation_list if wt > 0]
+
+    plt.figure(figsize=(24, 12))
+    plt.plot(query_latent, label='Query Latent', alpha=0.5)
+    plt.plot(nun_latent, label='NUN Latent', alpha=0.5)
+
+    for feature in positive_features:
+        plt.scatter(feature, query_latent[feature], color='blue', s=80, zorder=5)
+        plt.scatter(feature, nun_latent[feature], color='orange', s=80, zorder=5)
+        plt.plot([feature, feature], [query_latent[feature], nun_latent[feature]], color='purple', linestyle='--', zorder=4)
+
+    plt.title(f"Positive LIME Features Replaced for {image_filename}", fontsize=24)
+    plt.xlabel("Latent Feature Index", fontsize=20)
+    plt.ylabel("Latent Feature Value", fontsize=20)
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
+    plt.legend(fontsize=16)
+    plt.tight_layout()
+
+    plot_filename = os.path.join(SAVE_DIR, f"{image_filename}_positive_features.png")
+    plt.savefig(plot_filename, dpi=300)
+    plt.close()
+    logging.info(f"Saved positive LIME feature plot at {plot_filename}")
+
 
 # Process LIME on Latent Masking Using NUN (No Restriction)
 def process_lime_on_latent_masking_nun(classifier_type: str = "4_class"):
@@ -240,8 +274,10 @@ def process_lime_on_latent_masking_nun(classifier_type: str = "4_class"):
             logging.info(f"Image: {image_filename} | Prediction After Masking: {predicted_label_after_masking}")
 
             if predicted_label_after_masking_idx != predicted_label_before_masking_idx:
+                sparsity = round(np.sum(latent_vector != masked_latent_vector), 5)
+                proximity = round(np.linalg.norm(latent_vector - masked_latent_vector), 5)
                 counterfactual_found = True
-                break  # Stop replacing features once we get a counterfactual
+                break # Stop replacing features once we get a counterfactual
 
         total_time_taken = round(time.time() - start_time, 5)
         metrics = calculate_image_metrics(input_image, reconstructed_image)
@@ -255,6 +291,7 @@ def process_lime_on_latent_masking_nun(classifier_type: str = "4_class"):
         
         plot_lime_explanation(explanation, nun_filename, classifier_type=classifier_type)
         plot_replaced_features(latent_vector, nun_latent_vector, replaced_features, image_filename, classifier_type)
+        plot_positive_lime_features(latent_vector, nun_latent_vector, explanation, image_filename, classifier_type)
 
         update_results_csv(
             f"lime_on_latent_feature_{classifier_type}_NUN",
@@ -265,8 +302,10 @@ def process_lime_on_latent_masking_nun(classifier_type: str = "4_class"):
                 "Prediction (After Masking)": predicted_label_after_masking,
                 "Confidence (After Masking)": confidence_after_masking,              
                 "Counterfactual Found": counterfactual_found,
-                "Features Replaced": num_features_used,  # Features used before flip
-                "Feature Selection (%)": f"{percentage_changed:.2f}%",  # Percentage of modified features
+                "Features Replaced": num_features_used,
+                "Feature Selection (%)": f"{percentage_changed:.2f}%",
+                "Sparsity": sparsity if counterfactual_found else "",
+                "Proximity": proximity if counterfactual_found else "",
                 "SSIM": metrics.get("SSIM", "") if counterfactual_found else "",
                 "MSE": metrics.get("MSE", "") if counterfactual_found else "",
                 "PSNR": metrics.get("PSNR", "") if counterfactual_found else "",

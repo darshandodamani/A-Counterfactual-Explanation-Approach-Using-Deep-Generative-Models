@@ -39,9 +39,7 @@ METHODS_RESULTS: Dict[str, str] = {
     "lime_on_latent_feature_2_class": "results/masking/lime_on_latent/lime_on_latent_masking_2_classes_results.csv",
     "lime_on_latent_feature_4_class": "results/masking/lime_on_latent/lime_on_latent_masking_4_classes_results.csv",
      "lime_on_latent_feature_2_class_NUN": "results/masking/lime_on_latent/2_class_NUN_results.csv",
-    "lime_on_latent_feature_4_class_NUN": "results/masking/lime_on_latent/4_class_NUN_results.csv",
-    "shap_on_latent_feature_2_class": "results/masking/lime_on_latent/shap_on_latent_masking_2_classes_results.csv",
-    "shap_on_latent_feature_4_class": "results/masking/lime_on_latent/shap_on_latent_masking_4_classes_results.csv"
+    "lime_on_latent_feature_4_class_NUN": "results/masking/lime_on_latent/4_class_NUN_results.csv"
 }
 
 # ----------------------------------------------------------------------------
@@ -51,66 +49,58 @@ METHODS_HEADERS: Dict[str, list] = {
     "lime_on_latent_feature_2_class_NUN": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", 
-        "Counterfactual Found", "Features Replaced", "Feature Selection (%)",
+        "Counterfactual Found", "Features Replaced", "Feature Selection (%)", "Sparsity", "Proximity",
         "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
     ],
     "lime_on_latent_feature_4_class_NUN": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", 
-        "Counterfactual Found", "Features Replaced", "Feature Selection (%)",
+        "Counterfactual Found", "Features Replaced", "Feature Selection (%)", "Sparsity", "Proximity",
         "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
     ],
     "grid_based_2_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Grid Size", "Grid Position", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+        "Grid Size", "Grid Position", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
     ],
     "grid_based_4_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Grid Size", "Grid Position", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+        "Grid Size", "Grid Position", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
     ],
     "lime_on_image_2_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Grid Size", "Grid Position", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+        "Grid Size", "Grid Position", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
     ],
     "lime_on_image_4_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Grid Size", "Grid Position", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+        "Grid Size", "Grid Position", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
     ],
     "object_detection_2_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Grid Size", "Grid Position", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Objects Detected",
+        "Grid Size", "Grid Position", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Objects Detected",
         "Time Taken (s)"
     ],
     "object_detection_4_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Grid Size", "Grid Position", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Objects Detected",
+        "Grid Size", "Grid Position", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Objects Detected",
         "Time Taken (s)"
     ],
     "lime_on_latent_feature_2_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Feature Selection (%)", "Selected Features", "SSIM", "MSE", "PSNR", "UQI", "VIFP",
+        "Feature Selection (%)", "Selected Features", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP",
         "Time Taken (s)"
     ],
     "lime_on_latent_feature_4_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Feature Selection (%)", "Selected Features", "SSIM", "MSE", "PSNR", "UQI", "VIFP",
+        "Feature Selection (%)", "Selected Features", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP",
         "Time Taken (s)"
-    ],
-    "shap_on_latent_feature_2_class": [
-        "Image File", "Prediction (Before Masking)", "Prediction (After Masking)", "Counterfactual Found",
-        "Selected Features", "Time Taken (s)"
-    ],
-    "shap_on_latent_feature_4_class": [
-        "Image File", "Prediction (Before Masking)", "Counterfactual Found",
-        "Selected Features", "Time Taken (s)"
     ]
 }
 

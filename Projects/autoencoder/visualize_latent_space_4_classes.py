@@ -8,6 +8,8 @@ from torchvision import transforms
 from PIL import Image
 import os
 import sys
+from sklearn.metrics import silhouette_score
+import json
 
 # ---------------------- Configuration ----------------------
 # Define paths
@@ -132,3 +134,52 @@ plot_latent_projection(latent_tsne, predicted_labels,
                        "tsne_latent_space_predicted_labels.png")
 
 print(f"--------- All visualizations saved in {OUTPUT_DIR} ---------")
+
+from collections import Counter
+print("True label counts:", Counter(true_labels))
+print("Predicted label counts:", Counter(predicted_labels))
+
+
+# ---------------------- PCA Explained Variance ----------------------
+explained_variance_ratio = pca.explained_variance_ratio_
+total_variance = np.sum(explained_variance_ratio[:3])  # Use top 3 for fair comparison
+
+# ---------------------- Silhouette Score ----------------------
+print("Computing Silhouette Score...")
+silhouette = silhouette_score(latent_vectors, true_labels)
+
+# ---------------------- Centroid Distance Matrix ----------------------
+print("Computing Centroid Distance Matrix...")
+centroids = []
+for class_idx in range(len(CLASS_NAMES)):
+    class_latents = latent_vectors[np.array(true_labels) == class_idx]
+    centroid = np.mean(class_latents, axis=0)
+    centroids.append(centroid)
+
+# Compute Euclidean distances between class centroids
+centroids = np.array(centroids)
+centroid_distance_matrix = np.zeros((len(CLASS_NAMES), len(CLASS_NAMES)))
+for i in range(len(CLASS_NAMES)):
+    for j in range(len(CLASS_NAMES)):
+        centroid_distance_matrix[i][j] = np.linalg.norm(centroids[i] - centroids[j])
+
+# ---------------------- Save Metrics ----------------------
+# 1. Save PCA + Silhouette Score
+metrics = {
+    "explained_variance_ratio": explained_variance_ratio[:3].tolist(),
+    "total_variance_captured": float(total_variance),
+    "silhouette_score": float(silhouette)
+}
+
+metrics_path = os.path.join(OUTPUT_DIR, "qualitative_metrics.json")
+with open(metrics_path, "w") as f:
+    json.dump(metrics, f, indent=4)
+
+print(f"Qualitative metrics saved to '{metrics_path}'.")
+
+# 2. Save centroid distance matrix
+centroid_df = pd.DataFrame(centroid_distance_matrix, columns=CLASS_NAMES, index=CLASS_NAMES)
+centroid_path = os.path.join(OUTPUT_DIR, "centroid_distance_matrix.csv")
+centroid_df.to_csv(centroid_path)
+
+print(f"Centroid Distance Matrix saved to '{centroid_path}'.")
