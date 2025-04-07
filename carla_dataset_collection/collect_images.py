@@ -24,11 +24,40 @@ def connect_to_carla():
 def setup_world(client, town_name):
     logging.info(f"Loading {town_name}...")
     world = client.load_world(town_name)
+
+    # Synchronous mode setup
     settings = world.get_settings()
+    settings.synchronous_mode = True
+    settings.fixed_delta_seconds = 0.05
     settings.no_rendering_mode = False
     world.apply_settings(settings)
+
     logging.info("World loaded successfully.")
-    return world
+
+    # Return world and traffic manager
+    tm = client.get_trafficmanager()
+    tm.set_synchronous_mode(True)
+    return world, tm
+
+def spawn_npc_vehicles(world, tm, num_vehicles=30):
+    blueprint_library = world.get_blueprint_library()
+    vehicle_blueprints = blueprint_library.filter('vehicle.*')
+    spawn_points = world.get_map().get_spawn_points()
+
+    vehicles_list = []
+    random.shuffle(spawn_points)
+
+    for i in range(min(num_vehicles, len(spawn_points))):
+        bp = random.choice(vehicle_blueprints)
+        transform = spawn_points[i]
+        npc = world.try_spawn_actor(bp, transform)
+        if npc:
+            npc.set_autopilot(True, tm.get_port())
+            vehicles_list.append(npc)
+    
+    logging.info(f"Spawned {len(vehicles_list)} NPC vehicles.")
+    return vehicles_list
+
 
 def setup_vehicle(world, vehicle_bp_name="vehicle.audi.a2"):
     blueprint_library = world.get_blueprint_library()
@@ -54,7 +83,8 @@ def setup_camera(world, vehicle, image_size_x=160, image_size_y=80, fov=125):
 # Dataset Collection Function
 def collect_images(output_dir, town_name, image_size):
     client = connect_to_carla()
-    world = setup_world(client, town_name)
+    world, tm = setup_world(client, town_name)  # Updated to return tm
+    npc_vehicles = spawn_npc_vehicles(world, tm, num_vehicles=30)  # Pass tm to spawn NPCs
     vehicle = setup_vehicle(world)
     camera = setup_camera(world, vehicle, image_size[0], image_size[1])
     
@@ -121,6 +151,8 @@ def collect_images(output_dir, town_name, image_size):
             camera.destroy()
         if vehicle:
             vehicle.destroy()
+        for npc in npc_vehicles:  # Destroy all NPC vehicles
+            npc.destroy()
         logging.info("All actors destroyed.")
 
         # Log summary for transparency
