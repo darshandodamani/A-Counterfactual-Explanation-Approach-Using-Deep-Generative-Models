@@ -61,12 +61,12 @@ METHODS_HEADERS: Dict[str, list] = {
     "grid_based_2_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Grid Size", "Grid Position", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+        "Grid Size", "Grid Position", "Sparsity", "Proximity", "Masked Patches", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
     ],
     "grid_based_4_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",
         "Prediction (After Masking)", "Confidence (After Masking)", "Counterfactual Found",
-        "Grid Size", "Grid Position", "Sparsity", "Proximity", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
+        "Grid Size", "Grid Position", "Sparsity", "Proximity", "Masked Patches", "SSIM", "MSE", "PSNR", "UQI", "VIFP", "Time Taken (s)"
     ],
     "lime_on_image_2_class": [
         "Image File", "Prediction (Before Masking)", "Confidence (Before Masking)",

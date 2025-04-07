@@ -131,6 +131,9 @@ def process_grid_based_masking(classifier_type: str = "4_class"):
             for pos in range(total_positions):
                 masked_image = apply_grid_mask(input_image, grid_size, pos)
 
+                # Calculate the number of masked patches
+                num_masked_patches = torch.sum(masked_image == 0).item() // (IMAGE_HEIGHT // num_rows * IMAGE_WIDTH // num_cols)
+
                 # Encode Masked Image
                 latent_vector_masked = encoder(masked_image)[2]
 
@@ -155,8 +158,13 @@ def process_grid_based_masking(classifier_type: str = "4_class"):
                 if predicted_label_after_masking != predicted_label_before_masking:
                     counterfactual_found = True  # Mark CE as found
                     metrics = calculate_image_metrics(input_image, reconstructed_masked_image)
-                    sparsity = int(torch.sum(latent_vector != latent_vector_masked).item())
-                    proximity = round(float(torch.norm(latent_vector - latent_vector_masked).item()), 5)
+
+                    # Calculate sparsity as the ratio of masked patches to total patches
+                    sparsity = round(float(num_masked_patches / total_positions), 5)
+
+                    # Calculate proximity as the L2 norm between original and masked latent vectors
+                    proximity = round(float(torch.norm(latent_vector - latent_vector_re_encoded).item()), 5)
+
                     # Save Images Only if Counterfactual is Found
                     save_images(image_filename, input_image, masked_image, reconstructed_masked_image, IMAGE_DIRS)
                     break  # Stop checking more positions within this grid size
@@ -178,6 +186,7 @@ def process_grid_based_masking(classifier_type: str = "4_class"):
                 "Grid Position": f"{pos}" if counterfactual_found else "N/A",
                 "Sparsity": sparsity if counterfactual_found else "",
                 "Proximity": proximity if counterfactual_found else "",
+                "Masked Patches": num_masked_patches,  # Save the number of masked patches
                 "SSIM": metrics.get("SSIM", "") if counterfactual_found else "",
                 "MSE": metrics.get("MSE", "") if counterfactual_found else "",
                 "PSNR": metrics.get("PSNR", "") if counterfactual_found else "",
