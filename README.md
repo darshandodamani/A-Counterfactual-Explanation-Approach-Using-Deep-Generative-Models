@@ -57,7 +57,7 @@ Currently, the dataset is collected from **Town07** and **Town06** environments 
 To collect the dataset, use the following command:
 
 ```bash
-python collect_images.py --output_dir dataset/town7_dataset --town_name Town07 --image_size 160 80
+python carla_dataset_collection/collect_images.py --output_dir dataset/town7_dataset --town_name Town07 --image_size 160 80
 ```
 
 - **Parameters**:
@@ -79,7 +79,7 @@ The dataset is labeled based on the throttle and brake values collected from the
 To label the dataset, use the following command:
 
 ```bash
-python label_dataset.py --data_path <path_to_dataset>
+python carla_dataset_collection/label_dataset.py --data_path <path_to_dataset>
 ```
 
 - Example:
@@ -92,12 +92,12 @@ python label_dataset.py --data_path <path_to_dataset>
 To prepare the dataset for training, it needs to be split into **training** and **testing** subsets while maintaining balanced classes (`STOP` and `GO`). The splitting can be done using the command below:
 
 ```bash
-python split_dataset.py --data_path <path_to_dataset> --train_ratio 0.8
+python carla_dataset_collection/split_dataset.py --data_path <path_to_dataset> --train_ratio 0.8
 ```
 
 - Example:
   ```bash
-  python split_dataset.py --data_path ../dataset/town7_dataset --train_ratio 0.8
+  python carla_dataset_collection/split_dataset.py --data_path ../dataset/town7_dataset --train_ratio 0.8
   ```
 - **Parameters**:
   - `--train_ratio`: Ratio of the data to use for training (default: 0.8).
