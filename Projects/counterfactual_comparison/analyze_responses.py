@@ -94,20 +94,28 @@ plt.grid(axis="y", linestyle="--", alpha=0.6)
 plt.tight_layout()
 bar_plot_path = os.path.join(output_dir, "bar_plot_user_evaluations.png")
 plt.savefig(bar_plot_path)
-plt.show()
 print(f"Bar plot saved: {bar_plot_path}")
 
 # ============================
 # Step 7: Heatmap Using Seaborn
 # ============================
-plt.figure(figsize=(8, 5))
-sns.heatmap(df_pivot, annot=True, cmap="coolwarm", linewidths=0.5, fmt=".2f")
-plt.title("User Evaluation Heatmap")
-plt.xlabel("Method")
-plt.ylabel("Evaluation Criterion")
+plt.figure(figsize=(12, 8))
+sns.heatmap(
+    df_pivot,
+    annot=True,
+    cmap="coolwarm",
+    linewidths=0.5,
+    fmt=".2f",
+    annot_kws={"fontsize": 14}
+)
+plt.title("User Evaluation Heatmap", fontsize=18)
+plt.xlabel("Method", fontsize=16)
+plt.ylabel("Evaluation Criterion", fontsize=16)
+plt.xticks(fontsize=14, rotation=30)
+plt.yticks(fontsize=14, rotation=0)
+plt.tight_layout()
 heatmap_path = os.path.join(output_dir, "heatmap_user_evaluations.png")
 plt.savefig(heatmap_path)
-plt.show()
 print(f"Heatmap saved: {heatmap_path}")
 
 # ============================
@@ -139,13 +147,14 @@ for metric in metrics:
     
     if ratings_filtered:  # Only plot if there are valid ratings
         plt.bar(methods_filtered, ratings_filtered, color="skyblue", edgecolor="black")
-        plt.xlabel("Counterfactual Method")
-        plt.ylabel(f"Average {metric}")
-        plt.title(f"Average {metric} Ratings per Counterfactual Method")
+        plt.xlabel("Counterfactual Method", fontsize=16)
+        plt.ylabel(f"Average {metric}", fontsize=16)
+        plt.title(f"Average {metric} Ratings per Counterfactual Method", fontsize=18)
+        plt.xticks(fontsize=16)
+        plt.yticks(fontsize=16)
         plt.ylim(0, 5)  # Ratings range from 1 to 5
         metric_plot_path = os.path.join(output_dir, f"{metric}_ratings.png")
         plt.savefig(metric_plot_path)
-        plt.show()
         print(f"Bar chart for {metric} saved: {metric_plot_path}")
     else:
         logging.warning(f"No valid ratings available for {metric}. Skipping plot.")

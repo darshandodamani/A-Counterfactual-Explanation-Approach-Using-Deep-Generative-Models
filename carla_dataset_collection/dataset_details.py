@@ -4,6 +4,9 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Increase font sizes globally
+plt.rcParams.update({'font.size': 12, 'axes.titlesize': 16, 'axes.labelsize': 14, 'xtick.labelsize': 12, 'ytick.labelsize': 12})
+
 def process_2_class_dataset(train_csv, test_csv):
     # Check if files exist
     if not os.path.exists(train_csv):
@@ -76,20 +79,20 @@ def plot_summary_with_pie(summary, dataset_type):
     test_counts = summary['Test Count'][:-1]
 
     # Create a figure with two subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6), dpi=500)
 
     # Plot pie chart for Train dataset
-    ax1.pie(train_counts, labels=categories, autopct='%1.1f%%', startangle=90)
+    ax1.pie(train_counts, labels=categories, autopct='%1.1f%%', startangle=90, textprops={'fontsize': 16})
     ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
-    ax1.set_title('Train Dataset')
+    ax1.set_title('Train Dataset', fontsize=16)
 
     # Plot pie chart for Test dataset
-    ax2.pie(test_counts, labels=categories, autopct='%1.1f%%', startangle=90)
+    ax2.pie(test_counts, labels=categories, autopct='%1.1f%%', startangle=90, textprops={'fontsize': 16})
     ax2.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
-    ax2.set_title('Test Dataset')
+    ax2.set_title('Test Dataset', fontsize=16)
 
     # Add a main title for the figure
-    plt.suptitle(f'{dataset_type} Distribution in Train and Test Datasets')
+    plt.suptitle(f'{dataset_type} Distribution in Train and Test Datasets', fontsize=22)
 
     # Adjust layout and save the plot
     plt.tight_layout()
@@ -106,9 +109,10 @@ def plot_table(summary, dataset_type):
         fmt='g',
         cmap='Blues',
         cbar=False,
-        linewidths=0.5
+        linewidths=0.5,
+        annot_kws={"size": 16}  # Increase annotation font size
     )
-    plt.title(f"{dataset_type} Dataset Details Table")
+    plt.title(f"{dataset_type} Dataset Details Table", fontsize=16)
     plt.tight_layout()
 
     # Save and show the table plot
