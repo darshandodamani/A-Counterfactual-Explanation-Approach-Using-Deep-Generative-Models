@@ -38,3 +38,6 @@ model/
 
 # YOLOv5 downloaded from torch.hub 
 *.pt
+
+# ignore wandb
+wandb/

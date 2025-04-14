@@ -2,19 +2,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-def label_dataset(input_csv, output_csv, stop_quantile, go_quantile, turn_quantile, stop_threshold, go_threshold, turn_threshold, threshold_method, plot_path):
+def label_dataset(input_csv, output_csv, plot_path):
     # Load the dataset
     df = pd.read_csv(input_csv)
 
-    # Define thresholds based on provided statistics
-    stop_brake_threshold = 0.75
-    stop_throttle_threshold = 0.25
-    go_throttle_threshold = 0.25
-    go_steering_threshold = 0.01
-    turn_steering_threshold = 0.01
-    turn_brake_threshold = 0.75
+    # Define realistic thresholds
+    stop_brake_threshold = 0.5  # Brake > 0.5
+    stop_throttle_threshold = 0.2  # Throttle < 0.2
+    go_throttle_threshold = 0.5  # Throttle > 0.5
+    go_steering_threshold = 0.1  # |Steering| < 0.1
+    turn_steering_threshold = 0.1  # Steering > 0.1 or < -0.1
+    turn_brake_threshold = 0.5  # Brake < 0.5
 
-    print("Thresholds:")
+    print("Adjusted Thresholds:")
     print(f"STOP: brake > {stop_brake_threshold}, throttle < {stop_throttle_threshold}")
     print(f"GO: throttle > {go_throttle_threshold}, abs(steering) < {go_steering_threshold}")
     print(f"RIGHT: steering > {turn_steering_threshold}, brake < {turn_brake_threshold}")
@@ -35,9 +35,11 @@ def label_dataset(input_csv, output_csv, stop_quantile, go_quantile, turn_quanti
 
     df['label'] = df.apply(classify_row, axis=1)
 
-    # Print the first few labeled rows
-    print("Sample labeled rows:")
-    print(df[['steering', 'throttle', 'brake', 'label']].head())
+    # Debugging: Print counts for each condition
+    print(f"Rows classified as STOP: {len(df[df['label'] == 'STOP'])}")
+    print(f"Rows classified as GO: {len(df[df['label'] == 'GO'])}")
+    print(f"Rows classified as RIGHT: {len(df[df['label'] == 'RIGHT'])}")
+    print(f"Rows classified as LEFT: {len(df[df['label'] == 'LEFT'])}")
 
     # Filter out UNKNOWN labels
     df = df[df['label'] != 'UNKNOWN']
@@ -63,13 +65,6 @@ def label_dataset(input_csv, output_csv, stop_quantile, go_quantile, turn_quanti
 label_dataset(
     input_csv=os.path.join("dataset/town7_dataset/train", "train_data_log.csv"),
     output_csv=os.path.join("dataset/town7_dataset/train", "labeled_train_4_class_data_log.csv"),
-    stop_quantile=0.75,
-    go_quantile=0.25,
-    turn_quantile=0.75,
-    stop_threshold=0.75,
-    go_threshold=0.25,
-    turn_threshold=0.01,
-    threshold_method="manual",
     plot_path=os.path.join("plots/dataset_images_for_4_classes", "train_label_distribution.png")
 )
 
@@ -77,12 +72,5 @@ label_dataset(
 label_dataset(
     input_csv=os.path.join("dataset/town7_dataset/test", "test_data_log.csv"),
     output_csv=os.path.join("dataset/town7_dataset/test", "labeled_test_4_class_data_log.csv"),
-    stop_quantile=0.75,
-    go_quantile=0.25,
-    turn_quantile=0.75,
-    stop_threshold=0.75,
-    go_threshold=0.25,
-    turn_threshold=0.01,
-    threshold_method="manual",
     plot_path=os.path.join("plots/dataset_images_for_4_classes", "test_label_distribution.png")
 )

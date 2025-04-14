@@ -15,8 +15,11 @@ def split_dataset(data_path, train_ratio=0.8):
     train_csv = os.path.join(train_folder, "train_data_log.csv")
     test_csv = os.path.join(test_folder, "test_data_log.csv")
 
+    # Ensure directories are created
     os.makedirs(train_folder, exist_ok=True)
+    logging.info(f"Train folder created: {train_folder}")
     os.makedirs(test_folder, exist_ok=True)
+    logging.info(f"Test folder created: {test_folder}")
 
     data_df = pd.read_csv(input_csv)
     total_images = len(data_df)
@@ -60,6 +63,9 @@ def split_dataset(data_path, train_ratio=0.8):
             dest_path = os.path.join(dest_folder, filename)
             if os.path.exists(source_path):
                 shutil.copy(source_path, dest_path)
+                logging.info(f"Copied {filename} to {dest_folder}")
+            else:
+                logging.warning(f"Source file {source_path} does not exist!")
 
     copy_files(train_df['image_filename'], data_path, train_folder)
     copy_files(test_df['image_filename'], data_path, test_folder)
@@ -72,8 +78,8 @@ def split_dataset(data_path, train_ratio=0.8):
     # Plotting the dataset split as a pie chart
     os.makedirs(os.path.join('..', 'plots', 'dataset_images'), exist_ok=True)
     plt.figure(figsize=(8, 5))
-    plt.pie([len(train_df), len(test_df)], labels=['Train', 'Test'], colors=['blue', 'orange'], autopct='%1.1f%%')
-    plt.title('Train/Test Split of Dataset')
+    plt.pie([len(train_df), len(test_df)], labels=['Train', 'Test'], colors=['blue', 'orange'], autopct='%1.1f%%', textprops={'fontsize': 12})
+    plt.title('Train/Test Split of Dataset', fontsize=14)
     plot_path = os.path.join('..', 'plots', 'dataset_images', 'dataset_split.png')
     plt.savefig(plot_path)
     logging.info(f"Dataset split plot saved to {plot_path}")
@@ -82,12 +88,12 @@ def split_dataset(data_path, train_ratio=0.8):
     plt.figure(figsize=(10, 5))
 
     plt.subplot(1, 2, 1)
-    plt.pie([train_stop_count, train_go_count], labels=['STOP', 'GO'], colors=['red', 'green'], autopct='%1.1f%%')
-    plt.title('Train Set Label Distribution')
+    plt.pie([train_stop_count, train_go_count], labels=['STOP', 'GO'], colors=['red', 'green'], autopct='%1.1f%%', textprops={'fontsize': 12})
+    plt.title('Train Set Label Distribution', fontsize=14)
 
     plt.subplot(1, 2, 2)
-    plt.pie([test_stop_count, test_go_count], labels=['STOP', 'GO'], colors=['red', 'green'], autopct='%1.1f%%')
-    plt.title('Test Set Label Distribution')
+    plt.pie([test_stop_count, test_go_count], labels=['STOP', 'GO'], colors=['red', 'green'], autopct='%1.1f%%', textprops={'fontsize': 12})
+    plt.title('Test Set Label Distribution', fontsize=14)
 
     plot_path = os.path.join('..', 'plots', 'dataset_images', 'train_test_label_distribution.png')
     plt.savefig(plot_path)
