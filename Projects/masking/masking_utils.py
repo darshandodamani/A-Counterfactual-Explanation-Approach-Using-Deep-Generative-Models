@@ -354,22 +354,14 @@ def process_object_detection_based_masking():
         logging.info("Completed object detection masking.")
     
 def process_lime_on_image_masking():
-    """
-    Calls the LIME on Image masking script and executes the process.
-    """
-    from lime_on_images.lime_on_image_masking import process_lime_on_image_masking
-    classifer_types = ["2_class", "4_class"]
-    
-    processes = []
-    for classifier_type in classifer_types:
-        logging.info(f"Starting LIME on Image masking for {classifier_type} in parallel.")
-        p = multiprocessing.Process(target=process_lime_on_image_masking, args=(classifier_type,))
-        processes.append(p)
-        p.start()
-        
-    for p in processes:
-        p.join()
-        logging.info("Completed LIME on Image masking.")
+    from lime_on_images.lime_on_image_masking import process_lime_on_image_masking_all
+
+    logging.info("Starting LIME on Image masking...")
+    p = multiprocessing.Process(target=process_lime_on_image_masking_all)
+    p.start()
+    p.join()
+    logging.info("Completed LIME on Image masking.")
+
     
 def process_lime_on_latent_masking():
     """
