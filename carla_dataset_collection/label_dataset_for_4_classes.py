@@ -6,7 +6,7 @@ def label_dataset(input_csv, output_csv, plot_path):
     # Load the dataset
     df = pd.read_csv(input_csv)
 
-    # Define realistic thresholds
+    # Define realistic thresholds defined after calculations
     stop_brake_threshold = 0.5  # Brake > 0.5
     stop_throttle_threshold = 0.2  # Throttle < 0.2
     go_throttle_threshold = 0.5  # Throttle > 0.5
