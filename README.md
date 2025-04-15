@@ -19,94 +19,23 @@ We have used **CARLA (version 0.9.15)** as our urban driving simulator to collec
 # Prerequisites
 
 - **CARLA Version**: `0.9.15` (Urban Simulator)
-- **Python Version**: `3.7` is recommended for compatibility.
+- **Python Version**: `3.7` for (CARLA), and `3.11`(VAE) is recommended for compatibility.
 - **Additional Maps**: We have focused on **Town07** and **Town06**. Please download the additional maps alongside the CARLA server and copy them into the main CARLA directory to ensure seamless operation.
 
 # Setting Up the Project
 
-1. **Clone the Repository**: Clone this repository to get started.
-2. **Create Virtual Environment**: We recommend creating a Python virtual environment for this project:
-
-   ```bash
-   python -m venv venv_carla
-   ```
-
-   Activate the virtual environment:
-
-   ```bash
-   source venv_carla/bin/activate  # On Windows use: venv\Scripts\activate
-   ```
-3. **Install Dependencies**: Install the required dependencies using:
-
-   ```bash
-   pip install -r requirements_carla.txt
-   ```
-4. **Download CARLA Server**: Download **CARLA server (0.9.15)** and **additional maps** from the [official CARLA repository](https://github.com/carla-simulator/carla/releases).
-5. **Start CARLA Server**: Make sure to start the CARLA server before running the client.
-
-   ```bash
-   ./CarlaUE4.sh
-   ```
-
-# Dataset Collection
-
-Currently, the dataset is collected from **Town07** and **Town06** environments in CARLA. This dataset will be used for training the deep generative model and generating counterfactual explanations.
-
-### Running Dataset Collection
-
-To collect the dataset, use the following command:
-
-```bash
-python carla_dataset_collection/collect_images.py --output_dir dataset/town7_dataset --town_name Town07 --image_size 160 80
-```
-
-- **Parameters**:
-  - `--output_dir`: Directory where the collected dataset will be stored.
-  - `--town_name`: Specify the CARLA town (e.g., Town07, Town06).
-  - `--image_size`: Specify the width and height of the collected images.
-
-# Labeling and Splitting the Dataset
-
-Once the dataset is collected, the next steps are **labeling** and **splitting** the dataset for training and testing purposes.
-
-### Labeling the Dataset
-
-The dataset is labeled based on the throttle and brake values collected from the vehicle in CARLA. Images are labeled as `STOP` or `GO` based on thresholds for brake and throttle:
-
-- **STOP**: If `brake > 0.15` or `throttle < 0.25`.
-- **GO**: Otherwise.
-
-To label the dataset, use the following command:
-
-```bash
-python carla_dataset_collection/label_dataset.py --data_path <path_to_dataset>
-```
-
-- Example:
-  ```bash
-  python label_dataset.py --data_path ../dataset/town7_dataset
-  ```
-
-### Splitting the Dataset
-
-To prepare the dataset for training, it needs to be split into **training** and **testing** subsets while maintaining balanced classes (`STOP` and `GO`). The splitting can be done using the command below:
-
-```bash
-python carla_dataset_collection/split_dataset.py --data_path <path_to_dataset> --train_ratio 0.8
-```
-
-- Example:
-  ```bash
-  python carla_dataset_collection/split_dataset.py --data_path ../dataset/town7_dataset --train_ratio 0.8
-  ```
-- **Parameters**:
-  - `--train_ratio`: Ratio of the data to use for training (default: 0.8).
+**Clone the Repository**: Clone this repository to get started.
 
 ### Download the Models from Hugging Face
+
+The trained models are saved in the Hugging Face. To run and test the project.
 
 Download the models from [Hugging Face](https://huggingface.co/darshandodamani/VAE_models/tree/main) and place them in the `model/epochs_500_latent_128_town_7/` directory.
 
 The models are located in the `model/epochs_500_latent_128_town_7/` directory on Hugging Face.
+
+
+## For Human-centric Evaluations Please run the application
 
 ### Running the Web Application
 
