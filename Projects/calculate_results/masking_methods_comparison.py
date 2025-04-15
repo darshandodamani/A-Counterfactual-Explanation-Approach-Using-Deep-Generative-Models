@@ -160,9 +160,9 @@ def generate_comparison_table(all_images: Set[str],
 
 def generate_venn_diagram(sets: Dict[str, Set[str]], venn_path: str) -> None:
     """Generates and saves a Venn diagram for the provided method sets."""
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(14, 10))  
     venny4py(sets=sets)
-    plt.title("Venn Diagram of Counterfactual Explanation Coverage", fontsize=16)
+    plt.title("Venn Diagram of Counterfactual Explanation Coverage", fontsize=20)  
     plt.savefig(venn_path, bbox_inches='tight')
     plt.close()
     logging.info(f"Venn diagram saved as '{os.path.abspath(venn_path)}'")
@@ -176,16 +176,17 @@ def generate_bar_chart(grid_ce: Set[str],
     methods = ["Grid-Based", "LIME on Latent", "LIME on Images", "LIME on Latent NUN"]
     counts = [len(grid_ce), len(lime_latent_ce), len(lime_image_ce), len(lime_latent_nun_ce)]
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 8))  
     bars = plt.bar(methods, counts, color=['blue', 'orange', 'green', 'purple'])
     for bar in bars:
         yval = bar.get_height()
         plt.text(bar.get_x() + bar.get_width()/2, yval + 10, str(yval),
-                 ha='center', fontsize=12, fontweight='bold')
-    plt.xlabel("Masking Methods", fontsize=12, fontweight='bold')
-    plt.ylabel("Number of Images Explained", fontsize=12, fontweight='bold')
-    plt.title("Counterfactual Explanations per Method", fontsize=14, fontweight='bold')
-    plt.xticks(rotation=25)
+                 ha='center', fontsize=14, fontweight='bold')  
+    plt.xlabel("Masking Methods", fontsize=16, fontweight='bold')  
+    plt.ylabel("Number of Images Explained", fontsize=16, fontweight='bold')  
+    plt.title("Counterfactual Explanations per Method", fontsize=18, fontweight='bold')  
+    plt.xticks(rotation=25, fontsize=14)  
+    plt.yticks(fontsize=14)  
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.savefig(bar_chart_path, bbox_inches='tight')
     plt.close()
