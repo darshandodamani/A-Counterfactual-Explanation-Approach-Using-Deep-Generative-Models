@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import torch.nn.functional as F
 import random
+from skimage.metrics import structural_similarity as ssim
+import wandb
 
 # Import your updated encoder and decoder modules.
 from encoder import VariationalEncoder
@@ -70,16 +72,42 @@ class VariationalAutoencoder(nn.Module):
 #----------------------------------------------
 # Custom Dataset Class
 #----------------------------------------------
+# class CustomImageDatasetWithLabels(torch.utils.data.Dataset):
+#     def __init__(self, img_dir, csv_file, transform=None):
+#         self.img_dir = img_dir
+#         self.transform = transform
+#         self.data = []
+#         with open(csv_file, "r") as file:
+#             reader = csv.DictReader(file)
+#             for row in reader:
+#                 img_path = os.path.join(img_dir, row["image_filename"])
+#                 label = 0 if row["label"] == "STOP" else 1
+#                 self.data.append((img_path, label))
+    
+#     def __len__(self):
+#         return len(self.data)
+    
+#     def __getitem__(self, idx):
+#         img_path, label = self.data[idx]
+#         image = Image.open(img_path).convert("RGB")
+#         if self.transform:
+#             image = self.transform(image)
+#         return image, label, img_path
+
 class CustomImageDatasetWithLabels(torch.utils.data.Dataset):
     def __init__(self, img_dir, csv_file, transform=None):
         self.img_dir = img_dir
         self.transform = transform
         self.data = []
+
+        # Updated label mapping
+        self.label_map = {"STOP": 0, "GO": 1, "LEFT": 2, "RIGHT": 3}
+
         with open(csv_file, "r") as file:
             reader = csv.DictReader(file)
             for row in reader:
                 img_path = os.path.join(img_dir, row["image_filename"])
-                label = 0 if row["label"] == "STOP" else 1
+                label = self.label_map[row["label"]]
                 self.data.append((img_path, label))
     
     def __len__(self):
@@ -91,6 +119,7 @@ class CustomImageDatasetWithLabels(torch.utils.data.Dataset):
         if self.transform:
             image = self.transform(image)
         return image, label, img_path
+
 
 #----------------------------------------------
 # Loss Functions and Loss Selector
@@ -125,9 +154,9 @@ def vae_loss_selected(x, recon_x, mu, logvar, kl_weight=1.0, a=1.0):
     kld = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     return recon_loss + kl_weight * kld
 
-#----------------------------------------------
-# Additional Metrics: Pixel Accuracy and PSNR
-#----------------------------------------------
+#---------------------------------------------------
+# Additional Metrics: Pixel Accuracy, PSNR, and SSIM
+#---------------------------------------------------
 def pixel_accuracy(x, recon_x, threshold=0.5):
     if recon_x.shape[2:] != x.shape[2:]:
         recon_x = F.interpolate(recon_x, size=x.shape[2:], mode="bilinear", align_corners=False)
@@ -145,6 +174,11 @@ def calculate_psnr(x, recon_x):
         return float("inf")
     return 10 * math.log10(1.0 / mse)
 
+def calculate_ssim_tensor(x, recon_x):
+    x_np = x.squeeze().permute(1,2,0).cpu().numpy()
+    recon_np = recon_x.squeeze().permute(1,2,0).cpu().numpy()
+    return ssim(x_np, recon_np, channel_axis=2, data_range=1.0)  # for skimage ≥0.19
+
 #----------------------------------------------
 # Function to Save Sample Reconstructions
 #----------------------------------------------
@@ -159,7 +193,7 @@ def save_reconstruction_sample(model, dataloader, epoch, device, folder=f"plots/
                 recon = F.interpolate(recon, size=x.shape[2:], mode="bilinear", align_corners=False)
             orig_img = x[0].cpu().permute(1,2,0).numpy()
             recon_img = recon[0].cpu().permute(1,2,0).numpy()
-            plt.figure(figsize=(8,4))
+            plt.figure(figsize=(12,8))
             plt.subplot(1,2,1)
             plt.imshow(orig_img)
             plt.title("Original")
@@ -172,6 +206,13 @@ def save_reconstruction_sample(model, dataloader, epoch, device, folder=f"plots/
             save_path = os.path.join(folder, f"epoch_{epoch}.png")
             plt.savefig(save_path)
             plt.close()
+            # Log reconstruction to WandB
+            wandb.log({
+                "reconstruction": [
+                    wandb.Image(orig_img, caption="Original"),
+                    wandb.Image(recon_img, caption="Reconstruction")
+                ]
+            })
             break
     print(f"Reconstruction sample saved at epoch {epoch} in {folder}")
 
@@ -211,8 +252,10 @@ def validate_epoch(model, valloader, kl_weight, device):
     total_recon_loss = 0.0
     total_kl_loss = 0.0
     acc_sum = 0.0
+    ssim_sum = 0.0
     psnr_sum = 0.0
     total_samples = 0
+
     with torch.no_grad():
         for x, _, _ in valloader:
             x = x.to(device)
@@ -221,95 +264,120 @@ def validate_epoch(model, valloader, kl_weight, device):
                 recon = F.interpolate(recon, size=x.shape[2:], mode="bilinear", align_corners=False)
             loss = vae_loss_selected(x, recon, mu, logvar, kl_weight=kl_weight, a=1.0)
             total_loss += loss.item()
+
             if loss_type == "logcosh":
                 total_recon_loss += safe_log_cosh_loss(x, recon, a=1.0, reduction="sum").item()
             else:
                 total_recon_loss += mse_loss_fn(x, recon, reduction="sum").item()
+
             total_kl_loss += (-0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())).item()
+            
             acc = pixel_accuracy(x, recon, threshold=0.5)
             acc_sum += acc.item() * x.size(0)
+            
             batch_psnr = 0.0
+            batch_ssim = 0.0
             for i in range(x.size(0)):
                 mse_val = torch.nn.functional.mse_loss(recon[i:i+1], x[i:i+1], reduction="mean").item()
                 batch_psnr += 10 * math.log10(1.0 / (mse_val + 1e-10))
+
+                batch_ssim += calculate_ssim_tensor(x[i], recon[i])
+            
             psnr_sum += batch_psnr
+            ssim_sum += batch_ssim
             total_samples += x.size(0)
+
     avg_loss = total_loss / len(valloader.dataset)
     avg_recon = total_recon_loss / len(valloader.dataset)
     avg_kl = total_kl_loss / len(valloader.dataset)
     avg_acc = acc_sum / total_samples
     avg_psnr = psnr_sum / total_samples
-    return avg_loss, avg_recon, avg_kl, avg_acc, avg_psnr
+    avg_ssim = ssim_sum / total_samples
+    return avg_loss, avg_recon, avg_kl, avg_acc, avg_psnr, avg_ssim
+
 
 #----------------------------------------------
 # Plot Metrics and Save as Separate Files
 #----------------------------------------------
-def plot_metrics(train_losses, val_losses, train_recon_losses, val_recon_losses, train_kl_losses, val_kl_losses, val_accuracies, val_psnrs, num_epochs):
+def plot_metrics(train_losses, val_losses, train_recon_losses, val_recon_losses, 
+                 train_kl_losses, val_kl_losses, val_accuracies, val_psnrs, val_ssims, num_epochs):
     plots_folder = f"plots/{config_folder}"
     os.makedirs(plots_folder, exist_ok=True)
     epochs = list(range(1, num_epochs+1))
     
     # Total Loss Plot
-    plt.figure(figsize=(8,6))
-    plt.plot(epochs, train_losses, label="Train Loss")
-    plt.plot(epochs, val_losses, label="Val Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("Total Loss")
-    plt.title("Total Loss")
-    plt.legend()
+    plt.figure(figsize=(10, 8))  
+    plt.plot(epochs, train_losses, label="Train Loss", linewidth=3)  
+    plt.plot(epochs, val_losses, label="Val Loss", linewidth=3)  
+    plt.xlabel("Epoch", fontsize=16)  
+    plt.ylabel("Total Loss", fontsize=16)  
+    plt.title("Total Loss", fontsize=18)  
+    plt.legend(fontsize=16)  
     plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2f'))
     plt.tight_layout()
     plt.savefig(os.path.join(plots_folder, "total_loss.png"))
     plt.close()
     
     # Reconstruction Loss Plot
-    plt.figure(figsize=(8,6))
-    plt.plot(epochs, train_recon_losses, label="Train Recon Loss")
-    plt.plot(epochs, val_recon_losses, label="Val Recon Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("Reconstruction Loss")
-    plt.title("Reconstruction Loss (" + loss_type.upper() + ")")
-    plt.legend()
+    plt.figure(figsize=(10, 8))  
+    plt.plot(epochs, train_recon_losses, label="Train Recon Loss", linewidth=3)  
+    plt.plot(epochs, val_recon_losses, label="Val Recon Loss", linewidth=3)  
+    plt.xlabel("Epoch", fontsize=16)  
+    plt.ylabel("Reconstruction Loss", fontsize=16)  
+    plt.title("Reconstruction Loss (" + loss_type.upper() + ")", fontsize=18)  
+    plt.legend(fontsize=16)  
     plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2f'))
     plt.tight_layout()
     plt.savefig(os.path.join(plots_folder, "recon_loss.png"))
     plt.close()
     
     # KL Loss Plot
-    plt.figure(figsize=(8,6))
-    plt.plot(epochs, train_kl_losses, label="Train KL Loss")
-    plt.plot(epochs, val_kl_losses, label="Val KL Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("KL Divergence")
-    plt.title("KL Divergence")
-    plt.legend()
+    plt.figure(figsize=(10, 8))  
+    plt.plot(epochs, train_kl_losses, label="Train KL Loss", linewidth=3)  
+    plt.plot(epochs, val_kl_losses, label="Val KL Loss", linewidth=3)  
+    plt.xlabel("Epoch", fontsize=16)  
+    plt.ylabel("KL Divergence", fontsize=16)  
+    plt.title("KL Divergence", fontsize=18)  
+    plt.legend(fontsize=16)  
     plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2f'))
     plt.tight_layout()
     plt.savefig(os.path.join(plots_folder, "kl_loss.png"))
     plt.close()
     
     # Validation Pixel Accuracy Plot
-    plt.figure(figsize=(8,6))
-    plt.plot(epochs, val_accuracies, label="Val Pixel Accuracy")
-    plt.xlabel("Epoch")
-    plt.ylabel("Pixel Accuracy")
-    plt.title("Validation Pixel Accuracy")
-    plt.legend()
+    plt.figure(figsize=(10, 8))  
+    plt.plot(epochs, val_accuracies, label="Val Pixel Accuracy", linewidth=3)  
+    plt.xlabel("Epoch", fontsize=16)  
+    plt.ylabel("Pixel Accuracy", fontsize=16)  
+    plt.title("Validation Pixel Accuracy", fontsize=18)  
+    plt.legend(fontsize=16)  
     plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2f'))
     plt.tight_layout()
     plt.savefig(os.path.join(plots_folder, "val_accuracy.png"))
     plt.close()
     
     # Validation PSNR Plot
-    plt.figure(figsize=(8,6))
-    plt.plot(epochs, val_psnrs, label="Val PSNR")
-    plt.xlabel("Epoch")
-    plt.ylabel("PSNR (dB)")
-    plt.title("Validation PSNR")
-    plt.legend()
+    plt.figure(figsize=(10, 8))  
+    plt.plot(epochs, val_psnrs, label="Val PSNR", linewidth=3)  
+    plt.xlabel("Epoch", fontsize=16)  
+    plt.ylabel("PSNR (dB)", fontsize=16)  
+    plt.title("Validation PSNR", fontsize=18)  
+    plt.legend(fontsize=16)  
     plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.2f'))
     plt.tight_layout()
     plt.savefig(os.path.join(plots_folder, "val_psnr.png"))
+    plt.close()
+    
+    # Validation SSIM Plot
+    plt.figure(figsize=(10, 8))  
+    plt.plot(epochs, val_ssims, label="Val SSIM", linewidth=3)  
+    plt.xlabel("Epoch", fontsize=16)  
+    plt.ylabel("SSIM", fontsize=16)  
+    plt.title("Validation SSIM", fontsize=18)  
+    plt.legend(fontsize=16)  
+    plt.gca().yaxis.set_major_formatter(mtick.FormatStrFormatter('%.4f'))
+    plt.tight_layout()
+    plt.savefig(os.path.join(plots_folder, "val_ssim.png"))
     plt.close()
     
     print(f"Metric plots saved in the '{plots_folder}' folder.")
@@ -379,6 +447,7 @@ def main():
     val_kl_losses = []
     val_accuracies = []
     val_psnrs = []
+    val_ssims = []
     
     kl_weight = KL_WEIGHT_INITIAL
     patience = 50
@@ -394,14 +463,30 @@ def main():
     with open(csv_file, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["Epoch", "Train Loss", "Train Recon Loss", "Train KL Loss", 
-                         "Val Loss", "Val Recon Loss", "Val KL Loss", "Val Pixel Accuracy", "Val PSNR", "KL Weight"])
+                 "Val Loss", "Val Recon Loss", "Val KL Loss", 
+                 "Val Pixel Accuracy", "Val PSNR", "Val SSIM", "KL Weight"])
     
+    # Initialize WandB
+    wandb.init(
+        project="msc-thesis-vae-training-128-latent-space-logcosh",
+        name=f"VAE_{LATENT_SPACE}dim_{loss_type}",
+        config={
+            "epochs": NUM_EPOCHS,
+            "batch_size": BATCH_SIZE,
+            "learning_rate": LEARNING_RATE,
+            "latent_dim": LATENT_SPACE,
+            "kl_weight_initial": KL_WEIGHT_INITIAL,
+            "loss_type": loss_type
+        }
+    )
+    wandb.watch(model, log="all", log_freq=100)  # Auto-log gradients and model parameters
+
     for epoch in range(1, NUM_EPOCHS + 1):
         print(f"\nEpoch {epoch}/{NUM_EPOCHS}")
         kl_weight = min(KL_WEIGHT_INITIAL + epoch * 0.0001, 1.0)
         
         train_loss, train_recon, train_kl = train_epoch(model, train_loader, optimizer, epoch, kl_weight, device)
-        val_loss, val_recon, val_kl, val_acc, val_psnr = validate_epoch(model, val_loader, kl_weight, device)
+        val_loss, val_recon, val_kl, val_acc, val_psnr, val_ssim = validate_epoch(model, val_loader, kl_weight, device)
         
         scheduler.step(val_loss)
         
@@ -411,19 +496,48 @@ def main():
         val_recon_losses.append(val_recon)
         train_kl_losses.append(train_kl)
         val_kl_losses.append(val_kl)
+        val_ssims.append(val_ssim)
         val_accuracies.append(val_acc)
         val_psnrs.append(val_psnr)
         
         print(f"Epoch {epoch}: Train Loss={train_loss:.4f}, Val Loss={val_loss:.4f}")
         print(f"           Recon: Train={train_recon:.4f}, Val={val_recon:.4f} | KL: Train={train_kl:.4f}, Val={val_kl:.4f}")
-        print(f"           Val Pixel Accuracy: {val_acc:.4f}, Val PSNR: {val_psnr:.2f} dB")
+        print(f"           Val Pixel Accuracy: {val_acc:.4f}, Val PSNR: {val_psnr:.2f} dB, Val SSIM: {val_ssim:.4f}")
         print(f"           KL Weight: {kl_weight:.6f}")
         
         # Log epoch details to CSV.
         with open(csv_file, "a", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow([epoch, train_loss, train_recon, train_kl, val_loss, val_recon, val_kl, val_acc, val_psnr, kl_weight])
+            writer.writerow([epoch, train_loss, train_recon, train_kl, val_loss, val_recon, val_kl, val_acc, val_psnr, val_ssim, kl_weight])
         
+        # Log metrics to WandB
+        wandb.log({
+            # --- grouped metrics (for combined plots) ---
+            "loss/train": train_loss,
+            "loss/val": val_loss,
+            "recon/train": train_recon,
+            "recon/val": val_recon,
+            "kl/train": train_kl,
+            "kl/val": val_kl,
+
+            # --- individual metrics (for separate plots) ---
+            "train_loss": train_loss,
+            "val_loss": val_loss,
+            "train_recon_loss": train_recon,
+            "val_recon_loss": val_recon,
+            "train_kl_loss": train_kl,
+            "val_kl_loss": val_kl,
+
+            # --- extra validation-only metrics ---
+            "val_pixel_accuracy": val_acc,
+            "val_psnr": val_psnr,
+            "val_ssim": val_ssim,
+
+            # --- misc ---
+            "kl_weight": kl_weight,
+            "epoch": epoch
+        })
+
         # Save sample reconstruction every 10 epochs.
         if epoch % 10 == 0:
             save_reconstruction_sample(model, val_loader, epoch, device, folder=f"plots/{config_folder}/reconstructions")
@@ -445,10 +559,38 @@ def main():
             print("Early stopping triggered.")
             break
 
-    plot_metrics(train_losses, val_losses, train_recon_losses, val_recon_losses, train_kl_losses, val_kl_losses, val_accuracies, val_psnrs, epoch)
+    plot_metrics(train_losses, val_losses, train_recon_losses, val_recon_losses,
+             train_kl_losses, val_kl_losses, val_accuracies, val_psnrs, val_ssims, epoch)
     
     model.save()
     print("Training complete.")
+    # Log the same print-style summary to a separate CSV
+    pretty_csv = os.path.join("logs", f"{config_folder}_pretty_training_log.csv")
+    header = ["Epoch", "Train Loss", "Val Loss", "Train Recon", "Val Recon", 
+          "Train KL", "Val KL", "Val Accuracy", "Val PSNR", "Val SSIM", "KL Weight"]
+
+    # Write header once
+    if epoch == 1:
+        with open(pretty_csv, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+
+    # Write formatted row
+    with open(pretty_csv, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            epoch, 
+            f"{train_loss:.4f}", f"{val_loss:.4f}",
+            f"{train_recon:.4f}", f"{val_recon:.4f}",
+            f"{train_kl:.4f}", f"{val_kl:.4f}",
+            f"{val_acc:.4f}", f"{val_psnr:.2f}", f"{val_ssim:.4f}",
+            f"{kl_weight:.6f}"
+        ])
+        print(f"Pretty log saved to {pretty_csv}")
+        print(f"Training log saved to {csv_file}")
+
+    # End WandB run
+    wandb.finish()
 
 if __name__ == "__main__":
     main()

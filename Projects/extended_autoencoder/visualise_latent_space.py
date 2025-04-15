@@ -1,3 +1,4 @@
+# location: Projects/extended_autoencoder/visualise_latent_space.py
 import torch
 import numpy as np
 import pandas as pd
@@ -29,7 +30,7 @@ CLASSIFIER_PATH = "model/epochs_200_latent_128_ls_logcosh/classifier_4_classes.p
 
 # Define class labels and colors
 CLASS_NAMES = ["STOP", "GO", "RIGHT", "LEFT"]
-CLASS_COLORS = ["red", "green", "yellow", "purple"]  # Explicit color mapping
+CLASS_COLORS = ["red", "green", "yellow", "purple"]
 
 # Output directory for saving plots
 OUTPUT_DIR = "plots/latent_space_4_classes_logcosh/"
